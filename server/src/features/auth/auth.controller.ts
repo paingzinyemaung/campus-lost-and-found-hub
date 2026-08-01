@@ -148,3 +148,28 @@ export const login = async (
     });
   }
 };
+
+export const checkMe = async (req: Request, res: Response) => {
+  const clientCookies = req.cookies;
+
+  if (!clientCookies.token) {
+    return res.status(401).json({
+      ok: false,
+      message: 'Unauthorized',
+    });
+  }
+
+  try {
+    jwt.verify(clientCookies.token, process.env.JWT_SECRET!);
+  } catch (error) {
+    return res.status(401).json({
+      ok: false,
+      message: 'Invalid token!',
+    });
+  }
+
+  res.status(200).json({
+    ok: true,
+    message: 'User is valid',
+  });
+};
