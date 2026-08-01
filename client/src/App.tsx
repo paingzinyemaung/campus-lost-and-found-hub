@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
+import AddItem from './pages/AddItem';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
 
         <Route path="/dashboard" element={<ProtectedRoute />}>
           <Route index element={<Home />} />
+          <Route path="add-item" element={<AddItem />} />
         </Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
