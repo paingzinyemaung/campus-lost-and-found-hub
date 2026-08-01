@@ -32,7 +32,7 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {/* Home Button */}
         <a
-          href="/"
+          href="/dashboard"
           onClick={handleLogoHomeClick}
           className="btn btn-ghost btn-sm font-medium cursor-pointer"
         >
