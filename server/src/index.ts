@@ -5,7 +5,6 @@ import authRoute from './features/auth/auth.route.js';
 
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import noteRoute from './features/item/item.route.js';
 import path from 'path';
 import cors from 'cors';
 import itemRoute from './features/item/item.route.js';
