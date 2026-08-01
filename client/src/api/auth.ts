@@ -28,3 +28,27 @@ export const login = async ({
     throw error;
   }
 };
+
+export const register = async ({
+  name,
+  email,
+  password,
+  studentId,
+}: {
+  name: string;
+  email: string;
+  password: string;
+  studentId: string;
+}) => {
+  try {
+    const res = await api.post('/auth/register', {
+      name,
+      email,
+      password,
+      studentId,
+    });
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
