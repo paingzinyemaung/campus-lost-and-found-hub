@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  studentId String   @unique
+  password  String
+  items     Item[]   @relation("UserItems")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  category    String // 'LOST' သို့မဟုတ် 'FOUND'
+  status      String   @default("LOST")
+  imageUrl    String?
+  location    String
+  contactInfo String
+  userId      String
+  user        User     @relation("UserItems", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
