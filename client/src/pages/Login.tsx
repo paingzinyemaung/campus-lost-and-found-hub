@@ -73,12 +73,12 @@ export default function Login() {
                 <label className="text-xs font-semibold text-base-content/80">
                   စကားဝှက် (Password)
                 </label>
-                <a
+                {/* <a
                   href="#forgot"
                   className="text-xs text-primary hover:underline"
                 >
                   စကားဝှက်မေ့နေပါသလား?
-                </a>
+                </a> */}
               </div>
               <input
                 type="password"

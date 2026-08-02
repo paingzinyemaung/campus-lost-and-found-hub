@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useItems } from '../hook/item';
 import { useMe } from '../hook/auth';
+import ItemDetailModal from './ItemDetailModal';
 
 export default function Items() {
   const { data: itemsResponse, isLoading, error } = useItems();
@@ -15,6 +16,10 @@ export default function Items() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+
+  // Item Detail Modal အတွက် States
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const items = itemsResponse?.data || itemsResponse || [];
 
@@ -149,7 +154,11 @@ export default function Items() {
           {filteredItems.map((item: any) => (
             <div
               key={item.id}
-              className="bg-base-100 rounded-xl border border-base-300 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all"
+              onClick={() => {
+                setSelectedItem(item);
+                setIsModalOpen(true);
+              }}
+              className="bg-base-100 rounded-xl border border-base-300 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all cursor-pointer"
             >
               <div>
                 <div className="h-44 w-full bg-base-200 relative overflow-hidden">
@@ -201,6 +210,16 @@ export default function Items() {
           ))}
         </div>
       </div>
+
+      {/* Item Detail Modal Component */}
+      <ItemDetailModal
+        item={selectedItem}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedItem(null);
+        }}
+      />
     </div>
   );
 }
