@@ -1,32 +1,90 @@
-# React + TypeScript + Vite
+# Campus Lost & Found Hub (Client)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This is the frontend repository for the **Campus Lost & Found Hub** SaaS application, designed to help university students and staff easily report, find, and recover lost items on campus.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Tech Stack
 
-## React Compiler
+- **Framework:** React with TypeScript (Vite)
+- **Styling:** Tailwind CSS & DaisyUI
+- **State Management & Data Fetching:** TanStack Query (React Query)
+- **Routing:** React Router DOM
+- **HTTP Client:** Axios (with cookie-based credentials support)
+- **Notifications:** React Hot Toast
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 📂 Project Structure
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+client/
+├── public/               # Static assets
+├── src/
+│   ├── api/              # API call functions (Axios configurations)
+│   ├── assets/           # Images, icons, and global styles
+│   ├── components/       # Reusable components (Navbar, ItemCard, etc.)
+│   ├── hook/             # Custom React Query hooks (useMe, useUserLogout, etc.)
+│   ├── pages/            # Page components (Home, Login, Register, AddItem, etc.)
+│   ├── App.tsx           # Main application entry & routes
+│   └── main.tsx          # React DOM renderer
+├── .env                  # Environment variables
+├── package.json          # Dependencies and scripts
+└── README.md
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## ⚙️ Getting Started & Installation
+
+Follow these steps to set up and run the client locally on your machine.
+
+### 1. Prerequisites
+
+Make sure you have **Node.js** installed on your system.
+
+### 2. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd campus-lost-and-found-hub/client
+```
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Configure Environment Variables
+
+Create a `.env` file in the root of the `client` directory and configure your backend API base URL:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+### 5. Run the Development Server
+
+```bash
+npm run dev
+```
+
+The application will be running at `http://localhost:5173` (or the port specified by Vite).
+
+---
+
+## 🔒 Authentication & Security Features
+
+- **Cookie-Based Auth:** Securely handles authentication state using HTTP-only cookies managed by the backend.
+- **Protected Routes:** Restricts unauthorized users from accessing sensitive dashboards and features.
+- **Clean Logout Sequence:** Triggers a backend logout endpoint to clear session cookies, clears local storage/session storage, and resets the TanStack Query cache before redirecting to the login page.
+
+---
+
+## 📜 Available Scripts
+
+- `npm run dev` - Starts the development server.
+- `npm run build` - Builds the application for production.
+- `npm run lint` - Runs ESLint to check for code quality and errors.
+- `npm run preview` - Locally preview the production build.
