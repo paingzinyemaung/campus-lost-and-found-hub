@@ -59,7 +59,7 @@ Make sure you have **Node.js** installed on your system.
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/paingzinyemaung/campus-lost-and-found-hub.git
+git clone <repository-url>
 cd campus-lost-and-found-hub/server
 ```
 
