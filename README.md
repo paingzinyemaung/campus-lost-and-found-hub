@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🎓 Campus Lost & Found Hub
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=Campus%20Lost%20and%20Found%20Hub&fontSize=35&fontColor=fff&animation=fadeIn&fontY=38" width="100%" />
 
-  <p><b>A Modern Full-Stack SaaS Application for University Communities</b></p>
+  <p><b>A Modern Full-Stack SaaS Application Designed for University Communities</b></p>
 
   <p>
     <img src="https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
@@ -10,106 +10,124 @@
     <img src="https://img.shields.io/badge/Node.js-Express-5FA04E?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
     <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
     <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
   </p>
 
   <p>
-    <i>"Never lose track of your valuable belongings on campus again."</i>
+    <i>"Never lose track of your valuable belongings on campus again. Seamlessly connect finders and seekers."</i>
   </p>
 
 </div>
 
 ---
 
-## ✨ Overview At A Glance
+## 🎯 About The Project
 
-**Campus Lost & Found Hub** သည် တက္ကသိုလ်ကျောင်းဝန်းအတွင်း ပစ္စည်းပျောက်ဆုံးသူများနဲ့ ပစ္စည်းပြန်တွေ့ရှိသူများကို စနစ်တကျချိတ်ဆက်ပေးရန် ရည်ရွယ်တည်ဆောက်ထားသော **Full-Stack SaaS Application** တစ်ခု ဖြစ်ပါသည်။
+**Campus Lost & Found Hub** is a robust, full-stack SaaS platform tailored specifically for university campuses. It bridges the communication gap between students who have lost their belongings and honest finders who want to return them safely. Built with a modern tech stack, it delivers high performance, secure session handling, and an intuitive user experience.
 
-- **Frontend:** အသုံးပြုရလွယ်ကူပြီး လှပသော UI ဖြင့် တည်ဆောက်ထားသော React + TypeScript Single Page Application။
-- **Backend:** စနစ်ကျပြီး လုံခြုံသော Feature-based modular structure ဖြင့် တည်ဆောက်ထားသော Express + TypeScript Server။
-- **Security:** HTTP-only Cookies နှင့် JWT ကို အသုံးပြုထားသော လုံခြုံစိတ်ချရသော Authentication စနစ်။
+---
+
+## 🚀 Key Features
+
+- **🔐 Secure Authentication:** Implements HTTP-only Cookies and JWT for secure, stateless session management.
+- **⚡ Advanced State Management:** Powered by TanStack Query for optimal server-state synchronization and caching.
+- **📦 Modular Architecture:** Built with a clean, feature-based modular structure on the backend for effortless scalability.
+- **🖼️ Media Uploads:** Integrated with Multer to handle fast and secure local image uploads for lost/found item listings.
+- **📱 Fully Responsive UI:** Designed with Tailwind CSS to ensure a flawless experience across mobile, tablet, and desktop devices.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | React, Vite, TypeScript | Type-safe, high-performance Single Page Application |
+| **Styling** | Tailwind CSS / DaisyUI | Modern, responsive, and accessible UI components |
+| **State & Data** | TanStack Query (React Query) | Efficient asynchronous server state & caching management |
+| **Backend** | Node.js, Express, TypeScript | Scalable RESTful API server running on `tsx` watch mode |
+| **Database** | SQLite & Prisma ORM | Lightweight relational data management with type safety |
+| **Security** | JWT & HTTP-only Cookies | Robust protection against XSS and token theft |
 
 ---
 
 ## 🗂️ Project Structure (Monorepo Layout)
 
-ပရောဂျက် တစ်ခုလုံး၏ တည်ဆောက်ပုံကို အလွယ်တကူ သိရှိနိုင်ရန် အောက်ပါအတိုင်း ခွဲခြားထားပါသည် -
-
-campus-lost-and-found-hub/
-├── client/ # 💻 Frontend (React, Vite, Tailwind, TanStack Query)
-│ └── src/
-│ ├── api/ # API communication modules
-│ ├── components/ # Reusable UI components (Navbar, ItemCard, etc.)
-│ ├── hook/ # Custom React hooks
-│ ├── pages/ # Application views (Home, Login, AddItem, etc.)
-│ └── App.tsx # Main routing & layout
-│
-└── server/ # ⚙️ Backend (Node.js, Express, Prisma, SQLite)
-├── prisma/
-│ ├── migrations/ # Database migration history
-│ └── schema.prisma # Database models & schema
-├── src/
-│ ├── features/ # Modular features (auth, item)
-│ ├── middleware/ # Custom auth & upload middlewares
-│ └── index.ts # Server entry point
-└── uploads/ # Stored media & item images
+    campus-lost-and-found-hub/
+    ├── client/                 # 💻 Frontend Application (React + Vite + TypeScript)
+    │   └── src/
+    │       ├── api/            # Axios API integration modules
+    │       ├── components/     # Reusable UI components (Navbar, Cards, Modals)
+    │       ├── hook/           # Custom React hooks
+    │       ├── pages/          # Application views (Home, Login, Dashboard, AddItem)
+    │       └── App.tsx         # Root component & routing setup
+    │
+    └── server/                 # ⚙️ Backend Server (Node.js + Express + Prisma)
+        ├── prisma/
+        │   ├── migrations/     # Database migration audit logs
+        │   └── schema.prisma   # Database schema models
+        ├── src/
+        │   ├── features/       # Modular feature controllers & routes (auth, items)
+        │   ├── middleware/     # Authentication & Multer upload middlewares
+        │   └── index.ts        # Application entry point
+        └── uploads/            # Stored media assets for items
 
 ---
 
-## 🛠️ Tech Stack
+## ⚙️ Getting Started & Installation
 
-- **Frontend Framework:** React with TypeScript (Vite) for a modern, type-safe UI.
-- **Styling:** Tailwind CSS / DaisyUI for responsive design and clean components.
-- **Data Fetching:** TanStack Query (React Query) for powerful asynchronous state management.
-- **Backend Runtime:** Node.js, Express, and TypeScript running via tsx watch mode.
-- **Database & ORM:** SQLite paired with Prisma ORM for type-safe database operations.
-- **Authentication:** JWT and HTTP-only Cookies for secure session handling and clean logout flows.
-- **File Handling:** Multer for managing item images and local uploads.
+Follow these steps to set up and run the project locally on your machine.
 
----
+### Prerequisites
+Make sure you have **Node.js** and **npm** installed on your system.
 
-## 🚀 Getting Started & Installation
-
-ဒီပရောဂျက်ကို ကိုယ့်ရဲ့ Local စက်တွင် စမ်းသပ်လည်ပတ်ရန် အောက်ပါအဆင့်များကို အစဉ်အတိုင်း လုပ်ဆောင်ပါ။
-
-### 1. Clone Repository
-
-git clone https://github.com/paingzinyemaung/campus-lost-and-found-hub.git
-cd campus-lost-and-found-hub
+### 1. Clone the Repository
+    git clone https://github.com/paingzinyemaung/campus-lost-and-found-hub.git
+    cd campus-lost-and-found-hub
 
 ### 2. Setup Backend Server
+    cd server
+    npm install
 
-Terminal တစ်ခုဖွင့်ပြီး server ဖိုင်တွဲသို့ သွားပါ -
-cd server
-npm install
+- Create a `.env` file inside the `server/` directory and configure your environment variables:
+    PORT=3000
+    DATABASE_URL="file:./dev.db"
 
-- server/ ထဲတွင် .env ဖိုင်အသစ်ဖန်တီးပြီး အောက်ပါအတိုင်း ထည့်ပါ:
-  PORT=5000
-  DATABASE_URL="file:./dev.db"
+- Run database migrations and start the development server:
+    npx prisma migrate dev --name init
+    npm run dev
 
-- Database Migrate လုပ်ပြီး Server ကို စတင်ပါ:
-  npx prisma migrate dev --name init
-  npm run dev
-  _(Backend Server ကို http://localhost:3000 ဖြင့် စတင်လည်ပတ်ပါမည်)_
+*(The backend server will run at `http://localhost:3000`)*
 
 ### 3. Setup Frontend Client
+Open a new terminal window, navigate to the client folder, and run:
+    cd client
+    npm install
+    npm run dev
 
-Terminal အသစ်ထပ်ဖွင့်ပြီး client ဖိုင်တွဲသို့ သွားပါ -
-cd client
-npm install
-npm run dev
-_(Frontend Application ကို http://localhost:5173 ဖြင့် ဝင်ရောက်ကြည့်ရှုနိုင်ပါပြီ)_
+*(The frontend application will run at `http://localhost:5173`)*
 
 ---
 
-## 📜 Available Commands Summary
+## 📜 Available Scripts & Commands
 
-### ⚙️ Server Scripts (/server)
+### Backend (`/server`)
+- `npm run dev` — Starts the Express development server with live-reloading (`tsx`).
+- `npm run build` — Compiles TypeScript code into production-ready JavaScript inside `dist/`.
+- `npx prisma studio` — Opens Prisma's visual database GUI to inspect SQLite records.
 
-- npm run dev — ထည့်သွင်းထားသော tsx ဖြင့် Hot-reloading လုပ်ကာ Development Server စတင်ရန်။
-- npm run build — TypeScript ကို Production သို့ JavaScript သို့ dist/ ဖိုင်တွဲထဲသို့ Compile လုပ်ရန်။
-- npx prisma studio — SQLite Database ထဲက အချက်အလက်များကို Visual UI ဖြင့် ကြည့်ရှုစစ်ဆေးရန်။
+### Frontend (`/client`)
+- `npm run dev` — Launches the Vite development server.
+- `npm run build` — Bundles and optimizes the application for production deployment.
 
-### 💻 Client Scripts (/client)
+---
 
-- npm run dev — Vite Development Server ကို စတင်ရန်။
-- npm run build — Production အတွက် Optimized ဖြစ်အောင် Build လုပ်ရန်။
+## 👨‍💻 Author
+
+**Paing Zin Ye Maung**
+- GitHub: [paingzinyemaung](https://github.com/paingzinyemaung)
+
+---
+
+<div align="center">
+  <p>⭐ Feel free to drop a star if you find this project useful!</p>
+</div>
