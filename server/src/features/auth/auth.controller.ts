@@ -201,27 +201,19 @@ export const checkMe = async (req: Request, res: Response) => {
   }
 };
 
-// export const checkMe = async (req: Request, res: Response) => {
-//   const clientCookies = req.cookies;
+export const logout = async (req: Request, res: Response) => {
+  try {
+    // Cookie ကို ရှင်းလင်းခြင်း (Login ဝင်တုန်းက သုံးခဲ့တဲ့ cookie options တွေနဲ့ အတူတူ ပေးရပါတယ်)
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Local (http) မှာဆိုရင် false ဖြစ်သွားပါမယ်
+      sameSite: 'strict',
+    });
 
-//   if (!clientCookies.token) {
-//     return res.status(401).json({
-//       ok: false,
-//       message: 'Unauthorized',
-//     });
-//   }
-
-//   try {
-//     jwt.verify(clientCookies.token, process.env.JWT_SECRET!);
-//   } catch (error) {
-//     return res.status(401).json({
-//       ok: false,
-//       message: 'Invalid token!',
-//     });
-//   }
-
-//   res.status(200).json({
-//     ok: true,
-//     message: 'User is valid',
-//   });
-// };
+    return res
+      .status(200)
+      .json({ message: 'အောင်မြင်စွာ Logout ထွက်ပြီးပါပြီ' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};

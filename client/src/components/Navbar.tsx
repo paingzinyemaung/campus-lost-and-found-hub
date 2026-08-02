@@ -1,18 +1,49 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
+import { useMe, useUserLogout } from '../hook/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+
+  // TanStack Query မှ useMe ကို အသုံးပြု၍ Login ဝင်ထားခြင်း ရှိမရှိ စစ်ဆေးခြင်း
+  const { data: user, isLoading } = useMe();
+  const isLoggedIn = !!user; // user data ရှိလျှင် true, မရှိလျှင် false
+
+  // Custom Hook မှ logout mutation ကို ခေါ်ယူခြင်း
+  const { mutate: logoutMutation, isPending: isLoggingOut } = useUserLogout();
+
+  // Logout လုပ်သည့် Function (Backend API ခေါ်ပြီး Cookie ရှင်းလင်းခြင်း)
+  const handleLogout = () => {
+    logoutMutation(undefined, {
+      onSuccess: () => {
+        // Query cache တွေကို ရှင်းလင်းခြင်း
+        queryClient.clear();
+        // localStorage သို့မဟုတ် sessionStorage များကို ရှင်းရန် (လိုအပ်ပါက)
+        localStorage.clear();
+        sessionStorage.clear();
+        // Login စာမျက်နှာဆီသို့ တိကျစွာ ပို့ဆောင်ရန်
+        toast.success('အောင်မြင်စွာ Logout ထွက်ပြီးပါပြီ');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1000); // 1 စက္ကန့်စောင့်ပြီးမှ redirect လုပ်မည်
+      },
+      onError: (error) => {
+        console.error('Logout failed:', error);
+        toast.error('Logout failed');
+      },
+    });
+  };
 
   // Logo အတွက် သီးသန့် Function
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // အကယ်၍ Landing Page ပေါ်မှာ ရောက်နေပြီးသားဆိုရင် အပေါ်ဆုံးကို ပုံမှန်တက်သွားစေမည်
     if (location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // အခြား Page တစ်ခုခုရောက်နေရင် Landing Page ဆီသို့ သွားမည်
       navigate('/');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -33,7 +64,6 @@ export default function Navbar() {
 
       <div className="flex items-center gap-3">
         {/* Home / Dashboard Button */}
-        {/* a tag အစား React Router ရဲ့ Link ကိုပြောင်းသုံးထားပါတယ် */}
         <Link
           to="/dashboard"
           className="btn btn-ghost btn-sm font-medium cursor-pointer"
@@ -45,9 +75,24 @@ export default function Navbar() {
           Post Item
         </Link>
 
-        <Link to="/login" className="btn btn-outline btn-sm px-4">
-          Login
-        </Link>
+        {/* Loading စစ်နေစဉ် ခဏစောင့်ရန် (Optional) */}
+        {isLoading ? (
+          <div className="w-16 h-8 animate-pulse bg-base-300 rounded"></div>
+        ) : isLoggedIn ? (
+          // Login ဝင်ထားပါက Logout ပြရန် (Logout လုပ်နေစဉ် Loading ပြပေးရန် isLoggingOut ကို သုံးနိုင်သည်)
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="btn btn-outline btn-error btn-sm px-4"
+          >
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
+          </button>
+        ) : (
+          // မဝင်ရသေးပါက Login ခလုတ်ပြရန်
+          <Link to="/login" className="btn btn-outline btn-sm px-4">
+            Login
+          </Link>
+        )}
       </div>
     </header>
   );
