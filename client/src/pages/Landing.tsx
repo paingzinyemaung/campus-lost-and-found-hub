@@ -30,7 +30,7 @@ export default function Landing() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
-              to="/dashboard"
+              to="/items"
               className="btn btn-primary btn-md sm:btn-lg w-full sm:w-auto shadow-md gap-2"
             >
               🔍 ပစ္စည်းစာရင်းများကို ကြည့်ရန်

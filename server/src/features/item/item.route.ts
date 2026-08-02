@@ -11,10 +11,10 @@ import { upload } from '../../middleware/upload.middleware.js';
 
 const noteRoute = Router();
 
-noteRoute.use(protect);
-
 noteRoute.get('/', getItems);
 noteRoute.get('/:id', getItemById);
+
+noteRoute.use(protect);
 
 // upload.single('image') ကို protect နောက်မှ ထည့်ပေးပါ
 noteRoute.post('/', upload.single('image'), createItem);
