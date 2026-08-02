@@ -1,6 +1,6 @@
 # Campus Lost & Found Hub (Client)
 
-This is the frontend repository for the **Campus Lost & Found Hub** SaaS application, designed to help university students and staff easily report, find, and recover lost items on campus.
+This is the frontend client repository for the **Campus Lost & Found Hub** SaaS application, built with React, TypeScript, and Vite, featuring a clean modular architecture for managing campus-related lost and found items.
 
 ---
 
@@ -19,24 +19,33 @@ This is the frontend repository for the **Campus Lost & Found Hub** SaaS applica
 
 ```text
 client/
-├── public/               # Static assets
+├── public/               # Static public assets
 ├── src/
-│   ├── api/              # API call functions (Axios configurations & endpoints)
-│   ├── assets/           # Images, icons, and global styles
-│   ├── components/       # Reusable components (Navbar, ItemCard, etc.)
-│   ├── hook/             # Custom React Query hooks (useMe, useUserLogout, etc.)
-│   ├── pages/            # Page components (Home, Login, Register, AddItem, etc.)
-│   ├── App.tsx           # Main application entry & routes
-│   └── main.tsx          # React DOM renderer
+│   ├── api/              # API request modules (auth.ts, item.ts)
+│   ├── assets/           # Images, icons, and static resources
+│   ├── components/       # Reusable UI components (ItemCard, Navbar, ProtectedRoute)
+│   ├── hook/             # Custom React hooks (auth.ts, item.ts)
+│   ├── pages/            # View pages (Additem, Home, ItemDetailModal, Items, Landing, login, Notfound, Register)
+│   ├── services/         # Core service utilities
+│   ├── App.tsx           # Main application component & routes
+│   ├── App.css           # Global application styles
+│   ├── index.css         # Tailwind or base CSS index
+│   └── main.tsx          # Application entry point
+├── .gitignore            # Git ignore rules
+├── .oxlintrc.json        # Linter configuration
+├── index.html            # HTML root template
 ├── package.json          # Dependencies and scripts
-└── README.md
+├── package-lock.json     # Locked dependency versions
+├── tsconfig.app.json     # TypeScript app configuration
+├── tsconfig.json         # TypeScript main configuration
+└── tsconfig.node.json    # TypeScript node configuration
 ```
 
 ---
 
 ## ⚙️ Getting Started & Installation
 
-Follow these steps to set up and run the client locally on your machine.
+Follow these steps to set up and run the frontend client locally on your machine.
 
 ### 1. Prerequisites
 Make sure you have **Node.js** installed on your system.
@@ -44,7 +53,6 @@ Make sure you have **Node.js** installed on your system.
 ### 2. Clone the Repository
 ```bash
 git clone https://github.com/paingzinyemaung/campus-lost-and-found-hub.git
-
 cd campus-lost-and-found-hub/client
 ```
 
@@ -57,21 +65,20 @@ npm install
 ```bash
 npm run dev
 ```
-The application will be running at `http://localhost:5173` (or the port specified by Vite), communicating directly with the configured backend service endpoints.
+The application will be running at `http://localhost:5173` (or the port specified by Vite).
 
 ---
 
 ## 🔒 Authentication & Security Features
 
-* **Cookie-Based Auth:** Securely handles authentication state using HTTP-only cookies managed by the backend.
-* **Protected Routes:** Restricts unauthorized users from accessing sensitive dashboards and features.
-* **Clean Logout Sequence:** Triggers a backend logout endpoint to clear session cookies, clears local storage/session storage, and resets the TanStack Query cache before redirecting to the login page.
+* **Cookie-Based Sessions:** Communicates with the backend using secure HTTP-only cookies.
+* **Protected Routes:** Restricts unauthorized navigation to private views using dedicated wrapper components (`ProtectedRoute`).
+* **Clean Logout Flow:** Manages state clearance, cache resets, and redirection upon user sign-out.
 
 ---
 
 ## 📜 Available Scripts
 
-* `npm run dev` - Starts the development server.
-* `npm run build` - Builds the application for production.
-* `npm run lint` - Runs ESLint for code quality checks.
-* `npm run preview` - Locally preview the production build.
+* `npm run dev` — Starts the Vite development server.
+* `npm run build` — Type-checks and builds the production application.
+* `npm run preview` — Locally previews the production build.
