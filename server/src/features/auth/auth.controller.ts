@@ -160,16 +160,68 @@ export const checkMe = async (req: Request, res: Response) => {
   }
 
   try {
-    jwt.verify(clientCookies.token, process.env.JWT_SECRET!);
+    // ၁။ Token ကို verify လုပ်ပြီး payload ကို ယူပါမည်
+    const decoded = jwt.verify(
+      clientCookies.token,
+      process.env.JWT_SECRET!,
+    ) as any;
+
+    // ၂။ Token ထဲမှ ID ဖြင့် Database တွင် User ကို ရှာပါမည်
+    // (မှတ်ချက် - login လုပ်စဥ်က token payload ထဲသို့ ထည့်ပေးလိုက်သော key အမည်ပေါ်မူတည်၍ decoded.id သို့မဟုတ် decoded.userId ဖြစ်နိုင်ပါသည်)
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        // လုံခြုံရေးအရ Password ကို ဖယ်ချန်ထားခဲ့ပါ
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: 'User not found',
+      });
+    }
+
+    // ၃။ User အချက်အလက်ကို Frontend သို့ ပြန်ပို့ပေးပါမည်
+    return res.status(200).json({
+      ok: true,
+      message: 'User is valid',
+      user: user, // 👈 Frontend က လိုချင်နေတဲ့ Data ပါ
+    });
   } catch (error) {
     return res.status(401).json({
       ok: false,
       message: 'Invalid token!',
     });
   }
-
-  res.status(200).json({
-    ok: true,
-    message: 'User is valid',
-  });
 };
+
+// export const checkMe = async (req: Request, res: Response) => {
+//   const clientCookies = req.cookies;
+
+//   if (!clientCookies.token) {
+//     return res.status(401).json({
+//       ok: false,
+//       message: 'Unauthorized',
+//     });
+//   }
+
+//   try {
+//     jwt.verify(clientCookies.token, process.env.JWT_SECRET!);
+//   } catch (error) {
+//     return res.status(401).json({
+//       ok: false,
+//       message: 'Invalid token!',
+//     });
+//   }
+
+//   res.status(200).json({
+//     ok: true,
+//     message: 'User is valid',
+//   });
+// };

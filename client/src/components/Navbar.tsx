@@ -1,16 +1,18 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogoHomeClick = (e: React.MouseEvent) => {
+  // Logo အတွက် သီးသန့် Function
+  const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // အကယ်၍ Home (သို့) Landing Page ပေါ်မှာ ရောက်နေပြီးသားဆိုရင် အပေါ်ဆုံးကို ပုံမှန်တက်သွားစေမည်
+    // အကယ်၍ Landing Page ပေါ်မှာ ရောက်နေပြီးသားဆိုရင် အပေါ်ဆုံးကို ပုံမှန်တက်သွားစေမည်
     if (location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // အခြား Page တစ်ခုခု (ဥပမာ - Dashboard, Login) ရောက်နေရင် Landing Page ဆီသို့ သွားမည်
+      // အခြား Page တစ်ခုခုရောက်နေရင် Landing Page ဆီသို့ သွားမည်
       navigate('/');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -22,7 +24,7 @@ export default function Navbar() {
         {/* Logo */}
         <a
           href="/"
-          onClick={handleLogoHomeClick}
+          onClick={handleLogoClick}
           className="text-xl font-extrabold tracking-tight text-primary flex items-center gap-2 cursor-pointer"
         >
           🎓 Campus Lost & Found Hub
@@ -30,14 +32,14 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Home Button */}
-        <a
-          href="/dashboard"
-          onClick={handleLogoHomeClick}
+        {/* Home / Dashboard Button */}
+        {/* a tag အစား React Router ရဲ့ Link ကိုပြောင်းသုံးထားပါတယ် */}
+        <Link
+          to="/dashboard"
           className="btn btn-ghost btn-sm font-medium cursor-pointer"
         >
           Home
-        </a>
+        </Link>
 
         <Link to="/dashboard/add-item" className="btn btn-primary btn-sm px-4">
           Post Item
