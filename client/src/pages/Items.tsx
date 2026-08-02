@@ -9,13 +9,16 @@ export default function Items() {
   const { data: userData } = useMe();
   const navigate = useNavigate();
 
-  // Login ဝင်ထားခြင်း ရှိမရှိ စစ်ဆေးခြင်း
   const isAuthenticated = !!userData;
 
   // Search နှင့် Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // တစ်မျက်နှာလျှင် ပြမည့် ပစ္စည်းအရေအတွက်
 
   // Item Detail Modal အတွက် States
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -37,7 +40,30 @@ export default function Items() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // "နောက်သို့" ခလုတ်နှိပ်သည့်အခါ Login အခြေအနေအလိုက် လမ်းကြောင်းပြောင်းရန်
+  // Pagination တွက်ချက်ခြင်း (Filter ပြောင်းသွားရင် Page 1 ကို ပြန်သွားရန်)
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filteredItems.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
+  // Search သို့မဟုတ် Filter ပြောင်းပါက Page 1 သို့ ပြန်ပို့ရန်
+  const handleSearchChange = (e: any) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (e: any) => {
+    setSelectedCategory(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (e: any) => {
+    setSelectedStatus(e.target.value);
+    setCurrentPage(1);
+  };
+
   const handleBack = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
@@ -46,7 +72,6 @@ export default function Items() {
     }
   };
 
-  // "+ ပစ္စည်းအသစ် တင်မည်" ခလုတ်နှိပ်သည့်အခါ Login စစ်ဆေးရန်
   const handleAddItem = () => {
     if (isAuthenticated) {
       navigate('/dashboard/add-item');
@@ -87,42 +112,35 @@ export default function Items() {
 
         {/* Search & Filter Controls */}
         <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="form-control">
-            <input
-              type="text"
-              placeholder="ပစ္စည်းအမည် (သို့) နေရာဖြင့် ရှာရန်..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input input-bordered input-sm w-full text-xs"
-            />
-          </div>
-
-          <div className="form-control">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="select select-bordered select-sm w-full text-xs"
-            >
-              <option value="ALL">အမျိုးအစားအားလုံး (All Categories)</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Documents">Documents & Cards</option>
-              <option value="Personal Items">Personal Items</option>
-              <option value="Books">Books & Stationery</option>
-              <option value="Others">Others</option>
-            </select>
-          </div>
-
-          <div className="form-control">
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="select select-bordered select-sm w-full text-xs"
-            >
-              <option value="ALL">အခြေအနေအားလုံး (All Status)</option>
-              <option value="LOST">ပျောက်ဆုံးပစ္စည်း (Lost)</option>
-              <option value="FOUND">တွေ့ရှိသောပစ္စည်း (Found)</option>
-            </select>
-          </div>
+          <input
+            type="text"
+            placeholder="ပစ္စည်းအမည် (သို့) နေရာဖြင့် ရှာရန်..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="input input-bordered input-sm w-full text-xs"
+          />
+          <select
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            className="select select-bordered select-sm w-full text-xs"
+          >
+            <option value="ALL">အမျိုးအစားအားလုံး (All Categories)</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Documents">Documents & Cards</option>
+            <option value="Personal Items">Personal Items</option>
+            <option value="Books">Books & Stationery</option>
+            <option value="Others">Others</option>
+          </select>
+          <select
+            value={selectedStatus}
+            onChange={handleStatusChange}
+            className="select select-bordered select-sm w-full text-xs"
+          >
+            <option value="ALL">အခြေအနေအားလုံး (All Status)</option>
+            <option value="LOST">ပျောက်ဆုံးပစ္စည်း (Lost)</option>
+            <option value="FOUND">တွေ့ရှိသောပစ္စည်း (Found)</option>
+            <option value="RESOLVED">ပြီးမြောက်ပြီး (Resolved)</option>
+          </select>
         </div>
 
         {/* Loading & Error States */}
@@ -134,10 +152,7 @@ export default function Items() {
 
         {error && (
           <div className="alert alert-error text-xs shadow-sm">
-            <span>
-              ဒေတာရယူရာတွင် အမှားအယွင်း ရှိသွားပါသည်။ (Backend API ချိတ်ဆက်မှု
-              သို့မဟုတ် Token အခြေအနေကို စစ်ဆေးပေးပါ)
-            </span>
+            <span>ဒေတာရယူရာတွင် အမှားအယွင်း ရှိသွားပါသည်။</span>
           </div>
         )}
 
@@ -149,9 +164,9 @@ export default function Items() {
           </div>
         )}
 
-        {/* Items Grid */}
+        {/* Items Grid (currentItems ကိုပြရန်) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredItems.map((item: any) => (
+          {currentItems.map((item: any) => (
             <div
               key={item.id}
               onClick={() => {
@@ -209,9 +224,50 @@ export default function Items() {
             </div>
           ))}
         </div>
+
+        {/* DaisyUI Pagination Component */}
+        {totalPages > 1 && (
+          <div className="flex justify-center pt-4">
+            <div className="join shadow-sm border border-base-300 bg-base-100">
+              {/* ရှေ့သို့ ခလုတ် */}
+              <button
+                className="join-item btn btn-sm text-xs"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                « ရှေ့သို့
+              </button>
+
+              {/* Page Number ခလုတ်များ */}
+              {Array.from({ length: totalPages }, (_, index) => {
+                const pageNum = index + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    className={`join-item btn btn-sm text-xs ${currentPage === pageNum ? 'btn-active btn-primary' : ''}`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {/* နောက်သို့ ခလုတ် */}
+              <button
+                className="join-item btn btn-sm text-xs"
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                နောက်သို့ »
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Item Detail Modal Component */}
+      {/* Item Detail Modal */}
       <ItemDetailModal
         item={selectedItem}
         isOpen={isModalOpen}

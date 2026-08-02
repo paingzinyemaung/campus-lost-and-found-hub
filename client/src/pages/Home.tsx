@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useMe } from '../hook/auth';
 import { useItems, useUpdateItem, useDeleteItem } from '../hook/item';
+import toast from 'react-hot-toast';
 
 interface Item {
   id: string;
@@ -60,9 +61,22 @@ export default function Home() {
     });
   };
 
+  // const handleDelete = (id: string) => {
+  //   if (window.confirm('ဒီပစ္စည်းစာရင်းကို ဖျက်ရန် သေချာပါသလား?')) {
+  //     deleteMutation.mutate(id);
+  //   }
+  // };
+
   const handleDelete = (id: string) => {
     if (window.confirm('ဒီပစ္စည်းစာရင်းကို ဖျက်ရန် သေချာပါသလား?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          toast.success('ပစ္စည်းစာရင်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ');
+        },
+        onError: () => {
+          toast.error('ဖျက်ရာတွင် အမှားအယွင်း ရှိသွားပါသည်');
+        },
+      });
     }
   };
 
