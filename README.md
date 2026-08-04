@@ -52,37 +52,24 @@
 
 ## 🗂️ Project Structure (Monorepo Layout)
 
-campus-lost-and-found-hub/
-├── client/ # Frontend (React + Vite + TypeScript)
-│ ├── src/
-│ │ ├── api/ # API Request functions (auth, item)
-│ │ ├── components/ # Reusable UI Components (Navbar, ItemCard, ProtectedRoute)
-│ │ ├── hook/ # Custom React Hooks (auth, item)
-│ │ ├── pages/ # App Pages (Home, Login, Register, Items, AddItem, Landing, etc.)
-│ │ ├── services/ # Axios/Fetch API service configuration
-│ │ ├── App.tsx # Main App Component & Routing
-│ │ ├── main.tsx # Entry point for React
-│ │ └── index.css / App.css # Stylesheets
-│ ├── index.html
-│ ├── vite.config.ts # Vite Configuration
-│ └── package.json
-│
-├── server/ # Backend (Node.js/Express + Prisma + TypeScript)
-│ ├── prisma/ # Database Schema & Migrations
-│ │ ├── schema.prisma # Prisma DB Schema (User, Item models)
-│ │ └── migrations/ # Database migration history
-│ ├── src/
-│ │ ├── features/ # Feature-based Architecture (Controllers & Routes)
-│ │ │ ├── auth/ # Authentication Logic (auth.controller.ts, auth.route.ts)
-│ │ │ └── item/ # Lost & Found Item Logic (item.controller.ts, item.route.ts)
-│ │ ├── lib/ # Shared utilities/instances (prisma client connection)
-│ │ ├── middleware/ # Custom Middlewares (auth.middleware.ts, upload.middleware.ts)
-│ │ └── index.ts # Server Entry Point (Express setup)
-│ ├── .env # Environment variables
-│ ├── tsconfig.json
-│ └── package.json
-│
-└── README.md # Project Documentation
+    campus-lost-and-found-hub/
+    ├── client/                 # 💻 Frontend Application (React + Vite + TypeScript)
+    │   └── src/
+    │       ├── api/            # Axios API integration modules
+    │       ├── components/     # Reusable UI components (Navbar, Cards, Modals)
+    │       ├── hook/           # Custom React hooks
+    │       ├── pages/          # Application views (Home, Login, Dashboard, AddItem)
+    │       └── App.tsx         # Root component & routing setup
+    │
+    └── server/                 # ⚙️ Backend Server (Node.js + Express + Prisma)
+        ├── prisma/
+        │   ├── migrations/     # Database migration audit logs
+        │   └── schema.prisma   # Database schema models
+        ├── src/
+        │   ├── features/       # Modular feature controllers & routes (auth, items)
+        │   ├── middleware/     # Authentication & Multer upload middlewares
+        │   └── index.ts        # Application entry point
+        └── uploads/            # Stored media assets for items
 
 ---
 
