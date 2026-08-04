@@ -39,37 +39,50 @@
 
 ## 🛠️ Tech Stack & Architecture
 
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Frontend** | React, Vite, TypeScript | Type-safe, high-performance Single Page Application |
-| **Styling** | Tailwind CSS / DaisyUI | Modern, responsive, and accessible UI components |
+| Layer            | Technology                   | Purpose                                                  |
+| :--------------- | :--------------------------- | :------------------------------------------------------- |
+| **Frontend**     | React, Vite, TypeScript      | Type-safe, high-performance Single Page Application      |
+| **Styling**      | Tailwind CSS / DaisyUI       | Modern, responsive, and accessible UI components         |
 | **State & Data** | TanStack Query (React Query) | Efficient asynchronous server state & caching management |
-| **Backend** | Node.js, Express, TypeScript | Scalable RESTful API server running on `tsx` watch mode |
-| **Database** | SQLite & Prisma ORM | Lightweight relational data management with type safety |
-| **Security** | JWT & HTTP-only Cookies | Robust protection against XSS and token theft |
+| **Backend**      | Node.js, Express, TypeScript | Scalable RESTful API server running on `tsx` watch mode  |
+| **Database**     | SQLite & Prisma ORM          | Lightweight relational data management with type safety  |
+| **Security**     | JWT & HTTP-only Cookies      | Robust protection against XSS and token theft            |
 
 ---
 
 ## 🗂️ Project Structure (Monorepo Layout)
 
-    campus-lost-and-found-hub/
-    ├── client/                 # 💻 Frontend Application (React + Vite + TypeScript)
-    │   └── src/
-    │       ├── api/            # Axios API integration modules
-    │       ├── components/     # Reusable UI components (Navbar, Cards, Modals)
-    │       ├── hook/           # Custom React hooks
-    │       ├── pages/          # Application views (Home, Login, Dashboard, AddItem)
-    │       └── App.tsx         # Root component & routing setup
-    │
-    └── server/                 # ⚙️ Backend Server (Node.js + Express + Prisma)
-        ├── prisma/
-        │   ├── migrations/     # Database migration audit logs
-        │   └── schema.prisma   # Database schema models
-        ├── src/
-        │   ├── features/       # Modular feature controllers & routes (auth, items)
-        │   ├── middleware/     # Authentication & Multer upload middlewares
-        │   └── index.ts        # Application entry point
-        └── uploads/            # Stored media assets for items
+campus-lost-and-found-hub/
+├── client/ # Frontend (React + Vite + TypeScript)
+│ ├── src/
+│ │ ├── api/ # API Request functions (auth, item)
+│ │ ├── components/ # Reusable UI Components (Navbar, ItemCard, ProtectedRoute)
+│ │ ├── hook/ # Custom React Hooks (auth, item)
+│ │ ├── pages/ # App Pages (Home, Login, Register, Items, AddItem, Landing, etc.)
+│ │ ├── services/ # Axios/Fetch API service configuration
+│ │ ├── App.tsx # Main App Component & Routing
+│ │ ├── main.tsx # Entry point for React
+│ │ └── index.css / App.css # Stylesheets
+│ ├── index.html
+│ ├── vite.config.ts # Vite Configuration
+│ └── package.json
+│
+├── server/ # Backend (Node.js/Express + Prisma + TypeScript)
+│ ├── prisma/ # Database Schema & Migrations
+│ │ ├── schema.prisma # Prisma DB Schema (User, Item models)
+│ │ └── migrations/ # Database migration history
+│ ├── src/
+│ │ ├── features/ # Feature-based Architecture (Controllers & Routes)
+│ │ │ ├── auth/ # Authentication Logic (auth.controller.ts, auth.route.ts)
+│ │ │ └── item/ # Lost & Found Item Logic (item.controller.ts, item.route.ts)
+│ │ ├── lib/ # Shared utilities/instances (prisma client connection)
+│ │ ├── middleware/ # Custom Middlewares (auth.middleware.ts, upload.middleware.ts)
+│ │ └── index.ts # Server Entry Point (Express setup)
+│ ├── .env # Environment variables
+│ ├── tsconfig.json
+│ └── package.json
+│
+└── README.md # Project Documentation
 
 ---
 
@@ -78,44 +91,50 @@
 Follow these steps to set up and run the project locally on your machine.
 
 ### Prerequisites
+
 Make sure you have **Node.js** and **npm** installed on your system.
 
 ### 1. Clone the Repository
+
     git clone https://github.com/paingzinyemaung/campus-lost-and-found-hub.git
     cd campus-lost-and-found-hub
 
 ### 2. Setup Backend Server
+
     cd server
     npm install
 
 - Create a `.env` file inside the `server/` directory and configure your environment variables:
-    PORT=3000
-    DATABASE_URL="file:./dev.db"
+  PORT=3000
+  DATABASE_URL="file:./dev.db"
 
 - Run database migrations and start the development server:
-    npx prisma migrate dev --name init
-    npm run dev
+  npx prisma migrate dev --name init
+  npm run dev
 
-*(The backend server will run at `http://localhost:3000`)*
+_(The backend server will run at `http://localhost:3000`)_
 
 ### 3. Setup Frontend Client
-Open a new terminal window, navigate to the client folder, and run:
-    cd client
-    npm install
-    npm run dev
 
-*(The frontend application will run at `http://localhost:5173`)*
+Open a new terminal window, navigate to the client folder, and run:
+cd client
+npm install
+npm run dev
+
+_(The frontend application will run at `http://localhost:5173`)_
 
 ---
 
 ## 📜 Available Scripts & Commands
 
 ### Backend (`/server`)
+
 - `npm run dev` — Starts the Express development server with live-reloading (`tsx`).
 - `npm run build` — Compiles TypeScript code into production-ready JavaScript inside `dist/`.
 - `npx prisma studio` — Opens Prisma's visual database GUI to inspect SQLite records.
 
 ### Frontend (`/client`)
+
 - `npm run dev` — Launches the Vite development server.
 - `npm run build` — Bundles and optimizes the application for production deployment.
 
@@ -124,6 +143,7 @@ Open a new terminal window, navigate to the client folder, and run:
 ## 👨‍💻 Author
 
 **Paing Zin Ye Maung**
+
 - GitHub: [paingzinyemaung](https://github.com/paingzinyemaung)
 
 ---
