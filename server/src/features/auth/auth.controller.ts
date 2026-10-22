@@ -124,11 +124,13 @@ export const login = async (
       { expiresIn: '1d' },
     );
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     // ၅. Cookie အတွင်းသို့ Token ကို သိမ်းဆည်းပေးပို့ခြင်း
     res.cookie('token', token, {
       httpOnly: true, // XSS Attack များမှ ကာကွယ်ရန် (Client ဘက်မှ JS ဖြင့် ဖတ်၍မရစေရန်)
-      secure: process.env.NODE_ENV === 'production', // Production တွင် HTTPS ဖြင့်သာ အလုပ်လုပ်စေရန်
-      sameSite: 'strict', // CSRF Attack များမှ ကာကွယ်ရန်
+      secure: isProduction, // Production တွင် HTTPS ဖြင့်သာ အလုပ်လုပ်စေရန်
+      sameSite: isProduction ? 'none' : 'lax', // CSRF Attack များမှ ကာကွယ်ရန်
       maxAge: 24 * 60 * 60 * 1000, // ၁ ရက် (1 day in milliseconds)
     });
 

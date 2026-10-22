@@ -14,7 +14,7 @@ const noteRoute = Router();
 noteRoute.get('/', getItems);
 noteRoute.get('/:id', getItemById);
 
-noteRoute.use(protect);
+noteRoute.use(protect); // middleware
 
 // upload.single('image') ကို protect နောက်မှ ထည့်ပေးပါ
 noteRoute.post('/', upload.single('image'), createItem);

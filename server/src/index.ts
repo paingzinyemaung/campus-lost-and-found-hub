@@ -22,14 +22,16 @@ app.use(
   }),
 );
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
-// open upload folder as public
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// // open upload folder as public
+// app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static('uploads'));
 
-const PORT = 3000;
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+const PORT = Number(process.env.PORT) || 3000;
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
@@ -39,5 +41,5 @@ app.use('/api/auth', authRoute);
 app.use('/api/item', itemRoute);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}...`);
 });

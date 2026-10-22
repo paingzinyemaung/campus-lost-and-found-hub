@@ -10,10 +10,12 @@ export const createItem = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
 
     // ပုံဖိုင် ပါလာလျှင် URL တည်ဆောက်ခြင်း
-    let imageUrl = null;
-    if (req.file) {
-      imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    }
+    // let imageUrl = null;
+    // if (req.file) {
+    //   imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    // }
+
+    const imageUrl = req.file?.path ?? null;
 
     const newItem = await prisma.item.create({
       data: {

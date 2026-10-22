@@ -1,24 +1,38 @@
+import 'dotenv/config';
 import multer from 'multer';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-// ပုံသိမ်းမည့် နေရာနှင့် နာမည်သတ်မှတ်ခြင်း
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Project root မှာ 'uploads' folder ရှိရပါမယ်
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-// ပုံဖိုင် ဟုတ်မဟုတ် စစ်ဆေးခြင်း
-const fileFilter = (req: any, file: Express.Multer.File, cb: Function) => {
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'campus-lost-and-found',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  } as any,
+});
+
+const fileFilter = (
+  req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback,
+) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new Error('ပုံဖိုင် (Image) သာ တင်ခွင့်ရှိပါသည်။'), false);
+    cb(new Error('Image files only.'));
   }
 };
 
-export const upload = multer({ storage, fileFilter });
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
