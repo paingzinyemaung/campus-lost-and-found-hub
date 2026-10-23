@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://campus-lost-and-found-hub.vercel.app/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "https://campus-lost-and-found-hub.vercel.app/api/$1"
     },
     {
       "source": "/(.*)",
