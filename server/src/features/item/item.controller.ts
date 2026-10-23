@@ -2,6 +2,8 @@ import { prisma } from '../../lib/prisma.js';
 import type { Response } from 'express';
 import type { AuthRequest } from '../../middleware/auth.middleware.js';
 
+import { cloudinary } from '../../middleware/upload.middleware.js';
+
 // ၁. ပစ္စည်းအသစ် တင်ခြင်း (Lost & Found Post Create)
 export const createItem = async (req: AuthRequest, res: Response) => {
   try {
@@ -115,13 +117,12 @@ export const getItemById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// ၄. ကိုယ်တင်ထားသော ပစ္စည်းပို့စ်ကို ပြန်လည်ဖျက်ခြင်း (Delete Item)
 export const deleteItem = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
-    const userId = req.user?.id; // protect middleware မှ ပါလာသော လက်ရှိ user id
+    const userId = req.user?.id;
 
-    // ၁. ဖျက်မည့် ပစ္စည်း ရှိမရှိ စစ်ဆေးခြင်း
+    // 1. Find the item
     const item = await prisma.item.findUnique({
       where: { id },
     });
@@ -129,32 +130,61 @@ export const deleteItem = async (req: AuthRequest, res: Response) => {
     if (!item) {
       return res.status(404).json({
         ok: false,
-        message: 'ဖျက်ရန် ရှာမတွေ့သော ပစ္စည်း (သို့) ပို့စ် မရှိပါ။',
+        message: 'Item not found.',
       });
     }
 
-    // ၂. မိမိတင်ထားသော ပစ္စည်း ဟုတ်မဟုတ် စစ်ဆေးခြင်း (Authorization)
+    // 2. Check ownership
     if (item.userId !== userId) {
       return res.status(403).json({
         ok: false,
-        message: 'ဤပစ္စည်းပို့စ်ကို ဖျက်ရန် ခွင့်ပြုချက်မရှိပါ။',
+        message: 'You are not allowed to delete this item.',
       });
     }
 
-    // ၃. ပစ္စည်းကို ဖျက်ဆီးခြင်း
+    // 3. Delete the Cloudinary image if one exists
+    if (item.imageUrl) {
+      const url = new URL(item.imageUrl);
+      const uploadMarker = '/upload/';
+      const uploadIndex = url.pathname.indexOf(uploadMarker);
+
+      if (uploadIndex !== -1 && url.hostname === 'res.cloudinary.com') {
+        let publicId = url.pathname.slice(uploadIndex + uploadMarker.length);
+
+        // Remove the version prefix, e.g. v123456789/
+        publicId = publicId.replace(/^v\d+\//, '');
+
+        // Remove the file extension
+        publicId = publicId.replace(/\.[^/.]+$/, '');
+
+        const result = await cloudinary.uploader.destroy(publicId);
+
+        if (result.result !== 'ok' && result.result !== 'not found') {
+          console.error('Cloudinary deletion failed:', result);
+
+          return res.status(502).json({
+            ok: false,
+            message: 'Could not delete the image. The item was not deleted.',
+          });
+        }
+      }
+    }
+
+    // 4. Delete the database record
     await prisma.item.delete({
       where: { id },
     });
 
     return res.status(200).json({
       ok: true,
-      message: 'ပစ္စည်းပို့စ်ကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။',
+      message: 'Item and its image deleted successfully.',
     });
   } catch (error) {
     console.error('Delete Item Error:', error);
+
     return res.status(500).json({
       ok: false,
-      message: 'ဆာဗာတွင် အမှားယွင်းတချို့ ရှိသွားပါသည်။',
+      message: 'An error occurred while deleting the item.',
     });
   }
 };
