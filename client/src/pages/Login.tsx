@@ -3,25 +3,26 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useUserLogin } from '../hook/auth';
 import toast from 'react-hot-toast';
+import { useLang } from '../context/LanguageContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { mutate: userLogin, isPending } = useUserLogin();
-  // console.log(isError, error?.response?.data.message);
 
-  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleLogin = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     userLogin(
       { email, password },
       {
         onError: (e: any) => {
-          toast.error(e.response.data.message);
+          toast.error(e?.response?.data?.message ?? t('common.error'));
         },
         onSuccess: (res: any) => {
-          console.log(res);
           toast.success(res.data.message);
           navigate('/dashboard');
         },
@@ -30,87 +31,97 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col font-sans">
+    <div className="flex min-h-screen flex-col bg-base-200 font-sans">
       <Navbar />
 
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-base-100 border border-base-300 rounded-2xl shadow-xl p-8 space-y-6">
-          {/* Header Title & Emoji */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary text-xl mb-1">
+      <div className="flex flex-1 items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md space-y-6 rounded-2xl border border-base-300 bg-base-100 p-6 shadow-xl sm:p-8">
+          <div className="space-y-2 text-center">
+            <div className="mb-1 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-xl text-primary">
               👋
             </div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-base-content leading-relaxed">
-              ပြန်လည်ကြိုဆိုပါတယ်
+            <h1 className="text-xl font-bold leading-relaxed tracking-tight text-base-content md:text-2xl">
+              {t('login.title')}
             </h1>
-            <p className="text-xs text-base-content/60 leading-relaxed max-w-xs mx-auto">
-              Campus Lost & Found Hub သို့ ဝင်ရောက်ရန် သင့်အကောင့်ဖြင့် Login
-              ပြုလုပ်ပါ။
+            <p className="mx-auto max-w-xs text-xs leading-relaxed text-base-content/60">
+              {t('login.subtitle')}
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Email Field */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-base-content/80">
-                ကျောင်းသုံး အီးမေးလ် (Email)
+              <label
+                htmlFor="email"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                {t('field.email')}
               </label>
               <input
+                id="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 disabled={isPending}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@ucspyay.edu.mm"
-                className="input input-bordered input-sm md:input-md w-full text-sm bg-base-200/50 focus:bg-base-100"
+                className="input w-full text-base"
               />
             </div>
 
-            {/* Password Field */}
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-base-content/80">
-                  စကားဝှက် (Password)
-                </label>
-                {/* <a
-                  href="#forgot"
-                  className="text-xs text-primary hover:underline"
+              <label
+                htmlFor="password"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                {t('field.password')}
+              </label>
+              <label className="input w-full">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  disabled={isPending}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="grow text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={
+                    showPassword
+                      ? t('common.hidePassword')
+                      : t('common.showPassword')
+                  }
+                  className="text-base-content/60 hover:text-base-content"
                 >
-                  စကားဝှက်မေ့နေပါသလား?
-                </a> */}
-              </div>
-              <input
-                type="password"
-                disabled={isPending}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input input-bordered input-sm md:input-md w-full text-sm bg-base-200/50 focus:bg-base-100"
-              />
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </label>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={!email || !password || isPending}
-              className={`btn btn-primary w-full text-sm font-bold shadow-md mt-2 ${
-                isPending ? 'loading' : ''
-              }`}
+              className="btn btn-primary mt-2 h-11 w-full text-sm font-bold shadow-md"
             >
-              {isPending ? 'စစ်ဆေးနေပါသည်...' : 'အကောင့်ဝင်မည် (Login)'}
+              {isPending && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
+              {isPending ? t('login.submitting') : t('login.submit')}
             </button>
           </form>
 
-          {/* Register Link Footer */}
-          <div className="text-center text-xs text-base-content/60 pt-4 border-t border-base-200">
-            အကောင့်မရှိသေးဘူးလား?{' '}
+          <div className="border-t border-base-200 pt-4 text-center text-xs text-base-content/60">
+            {t('login.noAccount')}{' '}
             <Link
               to="/register"
-              className="text-primary font-bold hover:underline"
+              className="font-bold text-primary hover:underline"
             >
-              အသစ်စာရင်းသွင်းရန် (Register)
+              {t('login.registerLink')}
             </Link>
           </div>
         </div>

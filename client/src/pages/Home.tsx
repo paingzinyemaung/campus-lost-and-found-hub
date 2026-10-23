@@ -1,271 +1,313 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useMe } from '../hook/auth';
 import { useItems, useUpdateItem, useDeleteItem } from '../hook/item';
-import toast from 'react-hot-toast';
+import { useLang } from '../context/LanguageContext';
+import { statusBadge, useLabels } from '../hook/labels';
+import type { Item } from '../components/ItemCard';
 
-interface Item {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  location: string;
-  contactInfo: string;
-  status: string; // ဥပမာ - 'LOST', 'FOUND', 'RESOLVED'
-  imageUrl: string;
-  userId: string;
-  createdAt: string;
-}
+type MyItem = Item & { userId: string };
 
 export default function Home() {
-  // --- Data ဆွဲယူခြင်း ---
-  // const { data: userData, isLoading: isUserLoading } = useMe();
-  // const { data: itemsData, isLoading: isItemsLoading } = useItems();
-
-  // const updateMutation = useUpdateItem();
-  // const deleteMutation = useDeleteItem();
-
-  // // API response မှ data ကို အဆင့်ဆင့် ဖြေရှင်းယူခြင်း
-  // const resData = userData?.data || userData;
-  // const currentUser = resData?.data || resData?.user || resData;
-  // --- Data ဆွဲယူခြင်း ---
+  const { t } = useLang();
+  const { label, formatDate } = useLabels();
 
   const { data: userData, isLoading: isUserLoading } = useMe();
   const { data: itemsData, isLoading: isItemsLoading } = useItems();
-
   const updateMutation = useUpdateItem();
   const deleteMutation = useDeleteItem();
 
-  // API မှ response ကို ယူခြင်း
-  const resData = userData?.data || userData;
+  const [deleteTarget, setDeleteTarget] = useState<MyItem | null>(null);
 
-  // Backend မှ `user` ဆိုသည့် key ဖြင့် ပို့လိုက်သောကြောင့် ထို data ကို ယူပါမည်
+  const resData = userData?.data || userData;
   const currentUser = resData?.user || resData?.data || resData;
 
-  // getItems API တွင် res.data.data ကို တိုက်ရိုက် return ထားသဖြင့် itemsData သည် Array ဖြစ်နေပါပြီ
-  const items: Item[] = itemsData || [];
-
-  // မိမိကိုယ်တိုင် တင်ထားသော ပစ္စည်းများကိုသာ စစ်ထုတ်ရန် (Backend တွင် User ID ဖြင့် Filter မလုပ်ထားပါက)
+  const items: MyItem[] = Array.isArray(itemsData)
+    ? itemsData
+    : (itemsData?.data ?? []);
   const myItems = items.filter((item) => item.userId === currentUser?.id);
 
-  // --- Event Handlers ---
-  const handleToggleStatus = (item: Item) => {
+  const handleToggleStatus = (item: MyItem) => {
     const newStatus = item.status === 'RESOLVED' ? 'LOST' : 'RESOLVED';
-
-    // PUT Method ဖြစ်သဖြင့် ကျန်သော Data များကိုပါ ပူးတွဲပို့ပေးပါသည်
-    updateMutation.mutate({
-      id: item.id,
-      data: {
-        ...item,
-        status: newStatus,
+    updateMutation.mutate(
+      { id: item.id, data: { ...item, status: newStatus } },
+      {
+        onSuccess: () => toast.success(t('home.updated')),
+        onError: () => toast.error(t('home.updateFailed')),
       },
+    );
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success(t('home.deleted'));
+        setDeleteTarget(null);
+      },
+      onError: () => toast.error(t('home.deleteFailed')),
     });
   };
 
-  // const handleDelete = (id: string) => {
-  //   if (window.confirm('ဒီပစ္စည်းစာရင်းကို ဖျက်ရန် သေချာပါသလား?')) {
-  //     deleteMutation.mutate(id);
-  //   }
-  // };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('ဒီပစ္စည်းစာရင်းကို ဖျက်ရန် သေချာပါသလား?')) {
-      deleteMutation.mutate(id, {
-        onSuccess: () => {
-          toast.success('ပစ္စည်းစာရင်းကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ');
-        },
-        onError: () => {
-          toast.error('ဖျက်ရာတွင် အမှားအယွင်း ရှိသွားပါသည်');
-        },
-      });
-    }
-  };
-
+  // Loading skeleton
   if (isUserLoading || isItemsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="skeleton h-40 w-full rounded-box" />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="skeleton h-24 rounded-box" />
+          ))}
+        </div>
+        <div className="skeleton h-64 w-full rounded-box" />
+      </main>
     );
   }
 
-  // --- Statistics ---
-  const totalPosted = myItems.length;
-  const lostCount = myItems.filter((item) => item.status === 'LOST').length;
-  const foundCount = myItems.filter((item) => item.status === 'FOUND').length;
-  const resolvedCount = myItems.filter(
-    (item) => item.status === 'RESOLVED',
-  ).length;
-  {
-    console.log('All items:', myItems);
-  }
+  const lostCount = myItems.filter((i) => i.status === 'LOST').length;
+  const foundCount = myItems.filter((i) => i.status === 'FOUND').length;
+  const resolvedCount = myItems.filter((i) => i.status === 'RESOLVED').length;
+
+  const stats = [
+    {
+      label: t('home.stat.total'),
+      value: myItems.length,
+      icon: '📦',
+      tone: 'bg-primary/10 text-primary',
+    },
+    {
+      label: t('home.stat.lost'),
+      value: lostCount,
+      icon: '❗',
+      tone: 'bg-error/10 text-error',
+    },
+    {
+      label: t('home.stat.found'),
+      value: foundCount,
+      icon: '✅',
+      tone: 'bg-success/10 text-success',
+    },
+    {
+      label: t('home.stat.resolved'),
+      value: resolvedCount,
+      icon: '🎉',
+      tone: 'bg-info/10 text-info',
+    },
+  ];
+
+  const renderActions = (item: MyItem) => (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleToggleStatus(item)}
+        disabled={updateMutation.isPending}
+        className={`btn btn-sm flex-1 sm:flex-none ${
+          item.status !== 'RESOLVED'
+            ? 'btn-outline btn-info'
+            : 'btn-ghost border-base-300'
+        }`}
+      >
+        {item.status !== 'RESOLVED' ? t('home.markResolved') : t('home.reopen')}
+      </button>
+      <button
+        onClick={() => setDeleteTarget(item)}
+        aria-label={t('home.delete')}
+        className="btn btn-sm btn-square btn-outline btn-error"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+
+  const thumb = (item: MyItem, size: string) =>
+    item.imageUrl ? (
+      <img
+        src={item.imageUrl}
+        alt={item.title}
+        className={`${size} shrink-0 rounded-lg object-cover`}
+      />
+    ) : (
+      <div
+        className={`${size} flex shrink-0 items-center justify-center rounded-lg bg-base-200 text-lg`}
+      >
+        🖼️
+      </div>
+    );
+
   return (
-    <div className="min-h-screen bg-base-200 p-4 md:p-8 flex flex-col font-sans">
-      <div className="max-w-7xl mx-auto space-y-8 w-full">
-        {/* User Profile Section */}
-        {currentUser && (
-          <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="flex items-center gap-4">
-              <div className="avatar placeholder">
-                <div className="bg-primary text-primary-content rounded-full w-16 flex items-center justify-center">
-                  <span className="text-xl font-bold">
-                    {currentUser.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
+    <main className="mx-auto w-full max-w-7xl space-y-5 px-4 py-6 font-sans sm:space-y-6 sm:px-6 sm:py-8">
+      {/* Profile */}
+      {currentUser && (
+        <section className="rounded-box border border-base-300 bg-linear-to-br from-primary/10 via-base-100 to-base-100 p-5 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-content shadow sm:h-16 sm:w-16 sm:text-2xl">
+                {currentUser.name?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-base-content">
-                  ကြိုဆိုပါတယ်၊ {currentUser.name}! 👋
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold leading-relaxed wrap-break-word sm:text-2xl">
+                  {t('home.welcome')} {currentUser.name}! 👋
                 </h1>
-                <div className="flex flex-wrap gap-2 md:gap-4 mt-2 text-sm text-base-content/70">
-                  <span className="flex items-center gap-1">
-                    {currentUser.email}
-                  </span>
-                </div>
+                <p className="truncate text-xs text-base-content/70 sm:text-sm">
+                  {currentUser.email}
+                </p>
               </div>
             </div>
-            <div className="flex w-full md:w-auto gap-3">
-              <Link to="/items" className="btn btn-outline flex-1 md:flex-none">
-                ပစ္စည်းများ ရှာဖွေရန်
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:gap-3 md:w-auto">
+              <Link to="/items" className="btn btn-outline w-full sm:w-auto">
+                🔍 {t('home.browse')}
               </Link>
               <Link
                 to="/dashboard/add-item"
-                className="btn btn-primary flex-1 md:flex-none"
+                className="btn btn-primary w-full shadow-md sm:w-auto"
               >
-                + ပစ္စည်းအသစ် တင်မည်
+                + {t('home.addNew')}
               </Link>
             </div>
           </div>
-        )}
+        </section>
+      )}
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <div className="stat bg-base-100 rounded-2xl shadow-sm border border-base-300">
-            <div className="stat-title font-medium">စုစုပေါင်းတင်ထားမှု</div>
-            <div className="stat-value text-base-content mt-2">
-              {totalPosted}
+      {/* Stats */}
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm"
+          >
+            <div
+              className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg text-base ${s.tone}`}
+            >
+              {s.icon}
+            </div>
+            <div className="text-3xl font-extrabold leading-none">
+              {s.value}
+            </div>
+            <div className="mt-2 text-xs leading-relaxed text-base-content/60">
+              {s.label}
             </div>
           </div>
-          <div className="stat bg-base-100 rounded-2xl shadow-sm border border-error/20">
-            <div className="stat-title font-medium">ပျောက်ဆုံး (Lost)</div>
-            <div className="stat-value text-error mt-2">{lostCount}</div>
-          </div>
-          <div className="stat bg-base-100 rounded-2xl shadow-sm border border-success/20">
-            <div className="stat-title font-medium">တွေ့ရှိ (Found)</div>
-            <div className="stat-value text-success mt-2">{foundCount}</div>
-          </div>
-          <div className="stat bg-base-100 rounded-2xl shadow-sm border border-info/20">
-            <div className="stat-title font-medium">ပြီးမြောက် (Resolved)</div>
-            <div className="stat-value text-info mt-2">{resolvedCount}</div>
-          </div>
+        ))}
+      </section>
+
+      {/* My items */}
+      <section className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">
+        <div className="flex items-center justify-between gap-3 border-b border-base-300 p-4 sm:p-6">
+          <h2 className="flex items-center gap-2 text-base font-bold leading-relaxed sm:text-xl">
+            📦 {t('home.myItems')}
+          </h2>
+          <span className="badge badge-primary">{myItems.length}</span>
         </div>
 
-        {/* Items Table Section */}
-        <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 overflow-hidden">
-          <div className="p-6 border-b border-base-300 flex justify-between items-center">
-            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2">
-              📦 ကိုယ်တိုင်တင်ထားသော ပစ္စည်းများ
-            </h2>
-            <div className="badge badge-primary">{myItems.length}</div>
+        {myItems.length === 0 ? (
+          <div className="px-4 py-14 text-center">
+            <div className="mb-3 text-5xl">📭</div>
+            <h3 className="mb-2 text-lg font-bold leading-relaxed">
+              {t('home.emptyTitle')}
+            </h3>
+            <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-base-content/60">
+              {t('home.emptyDesc')}
+            </p>
+            <Link to="/dashboard/add-item" className="btn btn-primary">
+              {t('home.emptyCta')}
+            </Link>
           </div>
+        ) : (
+          <>
+            {/* ဖုန်း: Card list */}
+            <ul className="divide-y divide-base-200 md:hidden">
+              {myItems.map((item) => (
+                <li key={item.id} className="space-y-3 p-4">
+                  <div className="flex gap-3">
+                    {thumb(item, 'h-16 w-16')}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="truncate text-sm font-bold leading-relaxed">
+                        {item.title}
+                      </div>
+                      <div className="truncate text-xs text-base-content/60">
+                        📍 {item.location}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <span
+                          className={`badge badge-sm font-medium ${statusBadge(item.status)}`}
+                        >
+                          {label('status', item.status)}
+                        </span>
+                        <span className="badge badge-outline badge-sm">
+                          {label('category', item.category)}
+                        </span>
+                        <span className="text-[11px] text-base-content/50">
+                          {formatDate(item.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {renderActions(item)}
+                </li>
+              ))}
+            </ul>
 
-          {myItems.length === 0 ? (
-            <div className="text-center py-16 px-4">
-              <div className="text-5xl mb-4">📭</div>
-              <h3 className="text-lg font-bold mb-2">
-                ပစ္စည်းစာရင်း မရှိသေးပါ
-              </h3>
-              <p className="text-base-content/60 mb-6">
-                သင်တင်ထားသော ပျောက်ဆုံး/တွေ့ရှိ ပစ္စည်းများ ဤနေရာတွင်
-                ပေါ်လာပါမည်။
-              </p>
-              <Link to="/dashboard/add-item" className="btn btn-primary">
-                ပစ္စည်း စတင်တင်မည်
-              </Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra w-full">
+            {/* Tablet / Desktop: Table */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="table">
                 <thead className="bg-base-200/50">
                   <tr>
-                    <th>စဉ်</th>
-                    <th>အမည်</th>
-                    <th>အမျိုးအစား</th>
-                    <th>အခြေအနေ</th>
-                    <th>ရက်စွဲ</th>
-                    <th className="text-right">လုပ်ဆောင်ချက်များ</th>
+                    <th>{t('home.col.no')}</th>
+                    <th>{t('home.col.name')}</th>
+                    <th>{t('home.col.category')}</th>
+                    <th>{t('home.col.status')}</th>
+                    <th>{t('home.col.date')}</th>
+                    <th className="text-right">{t('home.col.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {myItems.map((item, index) => (
-                    <tr key={item.id} className="hover">
+                    <tr key={item.id} className="hover:bg-base-200/40">
                       <th className="font-normal text-base-content/60">
                         {index + 1}
                       </th>
-                      <td className="font-semibold text-base-content">
+                      <td>
                         <div className="flex items-center gap-3">
-                          {item.imageUrl && (
-                            <div className="avatar">
-                              <div className="mask mask-squircle w-10 h-10">
-                                <img src={item.imageUrl} alt={item.title} />
-                              </div>
+                          {thumb(item, 'h-10 w-10')}
+                          <div className="min-w-0">
+                            <div className="max-w-56 truncate font-bold">
+                              {item.title}
                             </div>
-                          )}
-                          <div>
-                            <div className="font-bold">{item.title}</div>
-                            <div className="text-xs opacity-50">
+                            <div className="max-w-56 truncate text-xs text-base-content/50">
                               {item.location}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td>{item.category}</td>
+                      <td className="text-sm">
+                        {label('category', item.category)}
+                      </td>
                       <td>
-                        <div
-                          className={`badge ${
-                            item.status === 'LOST'
-                              ? 'badge-error'
-                              : item.status === 'FOUND'
-                                ? 'badge-success'
-                                : 'badge-info'
-                          } badge-sm font-medium`}
+                        <span
+                          className={`badge badge-sm font-medium ${statusBadge(item.status)}`}
                         >
-                          {item.status}
-                        </div>
+                          {label('status', item.status)}
+                        </span>
                       </td>
-                      <td className="text-sm text-base-content/70">
-                        {new Date(item.createdAt).toLocaleDateString()}
+                      <td className="whitespace-nowrap text-sm text-base-content/70">
+                        {formatDate(item.createdAt)}
                       </td>
-                      <td className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleToggleStatus(item)}
-                            disabled={updateMutation.isPending}
-                            className={`btn btn-sm ${item.status !== 'RESOLVED' ? 'btn-outline btn-info' : 'btn-ghost'}`}
-                          >
-                            {item.status !== 'RESOLVED'
-                              ? 'Resolved ပြောင်းမည်'
-                              : 'Active ပြန်လုပ်မည်'}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deleteMutation.isPending}
-                            className="btn btn-sm btn-square btn-outline btn-error"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
+                      <td>
+                        <div className="flex justify-end">
+                          {renderActions(item)}
                         </div>
                       </td>
                     </tr>
@@ -273,9 +315,54 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
-          )}
+          </>
+        )}
+      </section>
+
+      {/* Delete confirm modal */}
+      {deleteTarget && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="modal modal-open modal-bottom sm:modal-middle"
+        >
+          <div className="modal-box">
+            <h3 className="text-lg font-bold leading-relaxed">
+              🗑️ {t('home.deleteTitle')}
+            </h3>
+            <p className="mt-3 truncate text-sm font-semibold">
+              “{deleteTarget.title}”
+            </p>
+            <p className="py-2 text-sm leading-relaxed text-base-content/70">
+              {t('home.deleteConfirm')}
+            </p>
+            <div className="modal-action">
+              <button
+                className="btn flex-1 sm:flex-none"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleteMutation.isPending}
+              >
+                {t('home.cancel')}
+              </button>
+              <button
+                className="btn btn-error flex-1 sm:flex-none"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
+                {t('home.delete')}
+              </button>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop"
+            onClick={() => setDeleteTarget(null)}
+            aria-hidden="true"
+          />
         </div>
-      </div>
-    </div>
+      )}
+    </main>
   );
 }

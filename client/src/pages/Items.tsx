@@ -1,273 +1,292 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import ItemCard, { type Item } from '../components/ItemCard';
+import ItemDetailModal from './ItemDetailModal';
 import { useItems } from '../hook/item';
 import { useMe } from '../hook/auth';
-import ItemDetailModal from './ItemDetailModal';
+import { useLang } from '../context/LanguageContext';
+import { useLabels } from '../hook/labels';
+
+const CATEGORIES = [
+  'Electronics',
+  'Documents',
+  'Personal Items',
+  'Books',
+  'Others',
+];
+const STATUSES = ['LOST', 'FOUND', 'RESOLVED'];
+const ITEMS_PER_PAGE = 6;
 
 export default function Items() {
   const { data: itemsResponse, isLoading, error } = useItems();
   const { data: userData } = useMe();
   const navigate = useNavigate();
+  const { t } = useLang();
+  const { label } = useLabels();
 
   const isAuthenticated = !!userData;
 
-  // Search နှင့် Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // တစ်မျက်နှာလျှင် ပြမည့် ပစ္စည်းအရေအတွက်
 
-  // Item Detail Modal အတွက် States
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const items = itemsResponse?.data || itemsResponse || [];
+  const items: Item[] = itemsResponse?.data || itemsResponse || [];
 
-  // Filter လုပ်ခြင်း
-  const filteredItems = items.filter((item: any) => {
+  const keyword = searchTerm.trim().toLowerCase();
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
-      item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.location?.toLowerCase().includes(searchTerm.toLowerCase());
-
+      !keyword ||
+      item.title?.toLowerCase().includes(keyword) ||
+      item.location?.toLowerCase().includes(keyword);
     const matchesCategory =
       selectedCategory === 'ALL' || item.category === selectedCategory;
     const matchesStatus =
       selectedStatus === 'ALL' || item.status === selectedStatus;
-
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Pagination တွက်ချက်ခြင်း (Filter ပြောင်းသွားရင် Page 1 ကို ပြန်သွားရန်)
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  const hasFilters =
+    !!keyword || selectedCategory !== 'ALL' || selectedStatus !== 'ALL';
+
+  // Pagination
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+  );
+  const page = Math.min(currentPage, totalPages);
   const currentItems = filteredItems.slice(
-    startIndex,
-    startIndex + itemsPerPage,
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
   );
 
-  // Search သို့မဟုတ် Filter ပြောင်းပါက Page 1 သို့ ပြန်ပို့ရန်
-  const handleSearchChange = (e: any) => {
-    setSearchTerm(e.target.value);
+  const goToPage = (p: number) => {
+    setCurrentPage(Math.min(Math.max(p, 1), totalPages));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Desktop မှာ ပြမယ့် page နံပါတ် (အများဆုံး ၅ ခု)
+  const pageNumbers: number[] = [];
+  const startPage = Math.max(1, Math.min(page - 2, totalPages - 4));
+  for (let p = startPage; p <= Math.min(totalPages, startPage + 4); p++)
+    pageNumbers.push(p);
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('ALL');
+    setSelectedStatus('ALL');
     setCurrentPage(1);
   };
 
-  const handleCategoryChange = (e: any) => {
-    setSelectedCategory(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleStatusChange = (e: any) => {
-    setSelectedStatus(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleBack = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/');
-    }
-  };
-
-  const handleAddItem = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard/add-item');
-    } else {
-      navigate('/login');
-    }
-  };
+  const handleBack = () => navigate(isAuthenticated ? '/dashboard' : '/');
+  const handleAddItem = () =>
+    navigate(isAuthenticated ? '/dashboard/add-item' : '/login');
 
   return (
-    <div className="min-h-screen bg-base-200 py-8 px-4 md:px-8 font-sans">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center bg-base-100 p-6 rounded-2xl border border-base-300 shadow-sm gap-4">
+    <div className="min-h-screen bg-base-200 font-sans">
+      <Navbar />
+
+      <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-base-content flex items-center gap-2">
-              🔍 ပစ္စည်းများ ရှာဖွေရန်
+            <h1 className="flex items-center gap-2 text-xl font-bold leading-relaxed sm:text-2xl">
+              🔍 {t('items.title')}
             </h1>
-            <p className="text-xs text-base-content/70 mt-1">
-              ကျောင်းဝန်းအတွင်း ပျောက်ဆုံးနေသော သို့မဟုတ် တွေ့ရှိထားသော
-              ပစ္စည်းစာရင်းများ
+            <p className="mt-1 text-xs leading-relaxed text-base-content/70">
+              {t('items.subtitle')}
             </p>
           </div>
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex w-full gap-2 sm:w-auto">
             <button
               onClick={handleBack}
-              className="btn btn-outline btn-sm text-xs flex-1 md:flex-none"
+              className="btn btn-outline btn-sm flex-1 sm:flex-none"
             >
-              ← နောက်သို့
+              ← {t('items.back')}
             </button>
             <button
               onClick={handleAddItem}
-              className="btn btn-primary btn-sm text-xs flex-1 md:flex-none"
+              className="btn btn-primary btn-sm flex-1 sm:flex-none"
             >
-              + ပစ္စည်းအသစ် တင်မည်
+              + {t('items.addNew')}
             </button>
           </div>
         </div>
 
-        {/* Search & Filter Controls */}
-        <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Search & Filters */}
+        <div className="grid grid-cols-1 gap-3 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:grid-cols-3">
           <input
-            type="text"
-            placeholder="ပစ္စည်းအမည် (သို့) နေရာဖြင့် ရှာရန်..."
+            type="search"
+            placeholder={t('items.search')}
             value={searchTerm}
-            onChange={handleSearchChange}
-            className="input input-bordered input-sm w-full text-xs"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="input w-full text-base"
           />
           <select
             value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="select select-bordered select-sm w-full text-xs"
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="select w-full text-base"
           >
-            <option value="ALL">အမျိုးအစားအားလုံး (All Categories)</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Documents">Documents & Cards</option>
-            <option value="Personal Items">Personal Items</option>
-            <option value="Books">Books & Stationery</option>
-            <option value="Others">Others</option>
+            <option value="ALL">{t('items.allCategories')}</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {label('category', c)}
+              </option>
+            ))}
           </select>
           <select
             value={selectedStatus}
-            onChange={handleStatusChange}
-            className="select select-bordered select-sm w-full text-xs"
+            onChange={(e) => {
+              setSelectedStatus(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="select w-full text-base"
           >
-            <option value="ALL">အခြေအနေအားလုံး (All Status)</option>
-            <option value="LOST">ပျောက်ဆုံးပစ္စည်း (Lost)</option>
-            <option value="FOUND">တွေ့ရှိသောပစ္စည်း (Found)</option>
-            <option value="RESOLVED">ပြီးမြောက်ပြီး (Resolved)</option>
+            <option value="ALL">{t('items.allStatus')}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {label('status', s)}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Loading & Error States */}
+        {/* Result count + clear */}
+        {!isLoading && !error && (
+          <div className="flex items-center justify-between text-xs text-base-content/60">
+            <span>
+              {filteredItems.length} {t('items.countSuffix')}
+            </span>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="btn btn-ghost btn-xs text-primary"
+              >
+                ✕ {t('items.clearFilters')}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Loading skeleton */}
         {isLoading && (
-          <div className="flex justify-center items-center py-20">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-box border border-base-300 bg-base-100"
+              >
+                <div className="skeleton aspect-[4/3] w-full rounded-none" />
+                <div className="space-y-3 p-4">
+                  <div className="skeleton h-4 w-2/3" />
+                  <div className="skeleton h-3 w-1/2" />
+                  <div className="skeleton h-3 w-full" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div className="alert alert-error text-xs shadow-sm">
-            <span>ဒေတာရယူရာတွင် အမှားအယွင်း ရှိသွားပါသည်။</span>
+          <div role="alert" className="alert alert-error text-xs shadow-sm">
+            <span>{t('items.error')}</span>
           </div>
         )}
 
+        {/* Empty */}
         {!isLoading && !error && filteredItems.length === 0 && (
-          <div className="text-center py-16 bg-base-100 rounded-2xl border border-base-300">
-            <p className="text-sm text-base-content/60">
-              ရှာဖွေတွေ့ရှိသော ပစ္စည်းစာရင်း မရှိပါ...
+          <div className="rounded-box border border-base-300 bg-base-100 px-4 py-16 text-center">
+            <div className="text-4xl">📭</div>
+            <p className="mt-3 text-sm leading-relaxed text-base-content/60">
+              {t('items.empty')}
             </p>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="btn btn-outline btn-sm mt-4"
+              >
+                {t('items.clearFilters')}
+              </button>
+            )}
           </div>
         )}
 
-        {/* Items Grid (currentItems ကိုပြရန်) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {currentItems.map((item: any) => (
-            <div
-              key={item.id}
-              onClick={() => {
-                setSelectedItem(item);
-                setIsModalOpen(true);
-              }}
-              className="bg-base-100 rounded-xl border border-base-300 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all cursor-pointer"
-            >
-              <div>
-                <div className="h-44 w-full bg-base-200 relative overflow-hidden">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-base-content/40">
-                      ပုံမရှိပါ
-                    </div>
-                  )}
-                  <span
-                    className={`absolute top-3 right-3 badge badge-sm font-bold text-[10px] ${item.status === 'LOST' ? 'badge-error' : 'badge-success'}`}
-                  >
-                    {item.status}
-                  </span>
-                </div>
+        {/* Grid */}
+        {!isLoading && !error && currentItems.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {currentItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setIsModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-                <div className="p-4 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h2 className="font-bold text-sm text-base-content line-clamp-1">
-                      {item.title}
-                    </h2>
-                    <span className="badge badge-outline text-[10px]">
-                      {item.category}
-                    </span>
-                  </div>
-                  <p className="text-xs text-base-content/70 flex items-center gap-1">
-                    📍 {item.location}
-                  </p>
-                  <p className="text-xs text-base-content/60 line-clamp-2">
-                    {item.description || 'အသေးစိတ်ဖော်ပြချက် မရှိပါ။'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 pt-0 border-t border-base-200 mt-2 flex items-center justify-between text-xs">
-                <span className="text-base-content/70">
-                  📞 {item.contactInfo}
-                </span>
-                <span className="text-[10px] text-base-content/50">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* DaisyUI Pagination Component */}
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center pt-4">
-            <div className="join shadow-sm border border-base-300 bg-base-100">
-              {/* ရှေ့သို့ ခလုတ် */}
+          <div className="flex justify-center pt-2">
+            <div className="join border border-base-300 bg-base-100 shadow-sm">
               <button
-                className="join-item btn btn-sm text-xs"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className="join-item btn btn-sm"
+                disabled={page === 1}
+                onClick={() => goToPage(page - 1)}
               >
-                « ရှေ့သို့
+                «
+                <span className="hidden sm:inline">
+                  {' '}
+                  {t('pagination.prev')}
+                </span>
               </button>
 
-              {/* Page Number ခလုတ်များ */}
-              {Array.from({ length: totalPages }, (_, index) => {
-                const pageNum = index + 1;
-                return (
-                  <button
-                    key={pageNum}
-                    className={`join-item btn btn-sm text-xs ${currentPage === pageNum ? 'btn-active btn-primary' : ''}`}
-                    onClick={() => setCurrentPage(pageNum)}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              {/* ဖုန်း: စာမျက်နှာ 2 / 5 */}
+              <button className="join-item btn btn-sm pointer-events-none sm:hidden">
+                {t('pagination.page')} {page} / {totalPages}
+              </button>
 
-              {/* နောက်သို့ ခလုတ် */}
+              {/* Tablet+: နံပါတ်များ */}
+              {pageNumbers.map((n) => (
+                <button
+                  key={n}
+                  className={`join-item btn btn-sm hidden sm:inline-flex ${
+                    page === n ? 'btn-primary' : ''
+                  }`}
+                  onClick={() => goToPage(n)}
+                >
+                  {n}
+                </button>
+              ))}
+
               <button
-                className="join-item btn btn-sm text-xs"
-                disabled={currentPage === totalPages}
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
+                className="join-item btn btn-sm"
+                disabled={page === totalPages}
+                onClick={() => goToPage(page + 1)}
               >
-                နောက်သို့ »
+                <span className="hidden sm:inline">
+                  {t('pagination.next')}{' '}
+                </span>
+                »
               </button>
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Item Detail Modal */}
       <ItemDetailModal
         item={selectedItem}
         isOpen={isModalOpen}

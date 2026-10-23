@@ -1,282 +1,353 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useCreateItem } from '../hook/item';
 import toast from 'react-hot-toast';
+import { useCreateItem } from '../hook/item';
+import { useLang } from '../context/LanguageContext';
+import { useLabels } from '../hook/labels';
+
+const CATEGORIES = [
+  'Electronics',
+  'Documents',
+  'Personal Items',
+  'Books',
+  'Others',
+];
+const MAX_IMAGE_MB = 5;
 
 export default function AddItem() {
   const navigate = useNavigate();
   const createMutation = useCreateItem();
+  const { t } = useLang();
+  const { label } = useLabels();
 
-  // Form States
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Electronics');
-  const [status, setStatus] = useState('LOST'); // 'LOST' သို့မဟုတ် 'FOUND'
+  const [status, setStatus] = useState<'LOST' | 'FOUND'>('LOST');
   const [location, setLocation] = useState('');
   const [contactInfo, setContactInfo] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // ပုံတင်သည့်အခါ Preview ပြရန်
+  // Preview URL ကို မသုံးတော့တဲ့အခါ memory ပြန်ရှင်းရန်
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(t('add.imageNotImage'));
+      e.target.value = '';
+      return;
     }
-  };
-
-  // Form တင်သွင်းခြင်း
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-
-    if (!title || !location || !contactInfo) {
-      setErrorMessage('ကျေးဇူးပြု၍ လိုအပ်သော အချက်အလက်များကို ဖြည့်စွက်ပါ။');
-      toast.error('ကျေးဇူးပြု၍ လိုအပ်သော အချက်အလက်များကို ဖြည့်စွက်ပါ။');
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      toast.error(t('add.imageTooBig'));
+      e.target.value = '';
       return;
     }
 
-    // Backend သို့ ပို့ရန် FormData တည်ဆောက်ခြင်း
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (!title.trim() || !location.trim() || !contactInfo.trim()) {
+      setErrorMessage(t('add.requiredError'));
+      toast.error(t('add.requiredError'));
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
+    formData.append('title', title.trim());
+    formData.append('description', description.trim());
     formData.append('category', category);
     formData.append('status', status);
-    formData.append('location', location);
-    formData.append('contactInfo', contactInfo);
-
-    if (imageFile) {
-      formData.append('image', imageFile);
-    }
+    formData.append('location', location.trim());
+    formData.append('contactInfo', contactInfo.trim());
+    if (imageFile) formData.append('image', imageFile);
 
     createMutation.mutate(formData, {
       onSuccess: () => {
-        toast.success('ပစ္စည်းအသစ် တင်ခြင်း အောင်မြင်ပါသည်။');
+        toast.success(t('add.success'));
         navigate('/dashboard');
       },
       onError: (err: any) => {
-        const errorMsg =
-          err?.response?.data?.message ||
-          'ပစ္စည်းတင်ရာတွင် အမှားအယွင်း ရှိသွားပါသည်။ ထပ်မံကြိုးစားပါ။';
-        setErrorMessage(errorMsg);
-        toast.error(errorMsg);
+        const msg = err?.response?.data?.message || t('add.failed');
+        setErrorMessage(msg);
+        toast.error(msg);
       },
     });
   };
 
+  const isPending = createMutation.isPending;
+
+  const statusOptions = [
+    {
+      value: 'LOST' as const,
+      icon: '😟',
+      title: t('add.lost'),
+      hint: t('add.lostHint'),
+      active: 'border-error bg-error/10 text-error',
+    },
+    {
+      value: 'FOUND' as const,
+      icon: '🎁',
+      title: t('add.found'),
+      hint: t('add.foundHint'),
+      active: 'border-success bg-success/10 text-success',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-base-200 py-8 px-4 md:px-8 font-sans">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header & Back Button */}
-        <div className="flex justify-between items-center bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-base-content flex items-center gap-2">
-              📦 ပစ္စည်းအသစ် တင်မည်
-            </h1>
-            <p className="text-xs text-base-content/70 mt-0.5">
-              ပျောက်ဆုံး သို့မဟုတ် တွေ့ရှိသော ပစ္စည်းအချက်အလက်များကို
-              ဖြည့်သွင်းပါ။
-            </p>
-          </div>
-          <Link
-            to="/dashboard"
-            className="btn btn-outline btn-sm text-xs font-normal"
-          >
-            ← နောက်သို့
-          </Link>
+    <main className="mx-auto w-full max-w-2xl space-y-4 px-4 py-6 font-sans sm:space-y-5 sm:px-6 sm:py-8">
+      {/* Header */}
+      <div className="flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div>
+          <h1 className="flex items-center gap-2 text-lg font-bold leading-relaxed sm:text-xl">
+            📦 {t('add.title')}
+          </h1>
+          <p className="mt-0.5 text-xs leading-relaxed text-base-content/70">
+            {t('add.subtitle')}
+          </p>
         </div>
+        <Link
+          to="/dashboard"
+          className="btn btn-outline btn-sm w-full sm:w-auto"
+        >
+          ← {t('add.back')}
+        </Link>
+      </div>
 
-        {/* Error Alert */}
-        {errorMessage && (
-          <div className="alert alert-error shadow-sm text-sm py-2">
-            <span>{errorMessage}</span>
+      {errorMessage && (
+        <div role="alert" className="alert alert-error text-sm shadow-sm">
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Form */}
+      <div className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Status */}
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-semibold text-base-content/80">
+              {t('add.type')} *
+            </legend>
+            <div className="grid grid-cols-2 gap-3">
+              {statusOptions.map((o) => (
+                <label
+                  key={o.value}
+                  className={`flex cursor-pointer flex-col items-center gap-1 rounded-box border-2 p-3 text-center transition focus-within:outline-2 focus-within:outline-primary sm:p-4 ${
+                    status === o.value
+                      ? o.active
+                      : 'border-base-300 text-base-content/70 hover:border-base-content/30'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="status"
+                    value={o.value}
+                    checked={status === o.value}
+                    onChange={() => setStatus(o.value)}
+                    className="sr-only"
+                  />
+                  <span className="text-2xl">{o.icon}</span>
+                  <span className="text-sm font-bold leading-relaxed">
+                    {o.title}
+                  </span>
+                  <span className="text-[11px] leading-relaxed opacity-70">
+                    {o.hint}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="title"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                {t('add.itemTitle')} *
+              </label>
+              <input
+                id="title"
+                type="text"
+                required
+                value={title}
+                disabled={isPending}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t('add.itemTitlePh')}
+                className="input w-full text-base"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="category"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                {t('add.category')} *
+              </label>
+              <select
+                id="category"
+                value={category}
+                disabled={isPending}
+                onChange={(e) => setCategory(e.target.value)}
+                className="select w-full text-base"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {label('category', c)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        )}
 
-        {/* Form Card */}
-        <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Status (Lost / Found) Selection */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs font-semibold text-base-content/80">
-                  အမျိုးအစား (Status) *
-                </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="location"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                📍 {t('add.location')} *
               </label>
-              <div className="flex gap-3">
-                <label
-                  className={`flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${status === 'LOST' ? 'border-error bg-error/10 text-error font-bold' : 'border-base-300 text-base-content/70'}`}
-                >
-                  <input
-                    type="radio"
-                    name="status"
-                    value="LOST"
-                    checked={status === 'LOST'}
-                    onChange={() => setStatus('LOST')}
-                    className="radio radio-error radio-sm"
-                  />
-                  ပျောက်ဆုံးပစ္စည်း (Lost)
-                </label>
-                <label
-                  className={`flex-1 flex items-center justify-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${status === 'FOUND' ? 'border-success bg-success/10 text-success font-bold' : 'border-base-300 text-base-content/70'}`}
-                >
-                  <input
-                    type="radio"
-                    name="status"
-                    value="FOUND"
-                    checked={status === 'FOUND'}
-                    onChange={() => setStatus('FOUND')}
-                    className="radio radio-success radio-sm"
-                  />
-                  တွေ့ရှိသောပစ္စည်း (Found)
-                </label>
-              </div>
+              <input
+                id="location"
+                type="text"
+                required
+                value={location}
+                disabled={isPending}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder={t('add.locationPh')}
+                className="input w-full text-base"
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Title */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-semibold text-base-content/80">
-                    ပစ္စည်းအမည် (Title) *
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="ဥပမာ - Student ID Card, iPhone 13"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="input input-bordered input-sm w-full text-xs"
-                  required
-                />
-              </div>
-
-              {/* Category */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-semibold text-base-content/80">
-                    အမျိုးအစားခွဲ (Category) *
-                  </span>
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  <option value="Electronics">
-                    Electronics (ဖုန်း၊ လက်ပ်တော့ စသည်)
-                  </option>
-                  <option value="Documents">
-                    Documents & Cards (ကတ်ပြား၊ စာရွက်စာတမ်း)
-                  </option>
-                  <option value="Personal Items">
-                    Personal Items (အသုံးအဆောင်ပစ္စည်း)
-                  </option>
-                  <option value="Books">
-                    Books & Stationery (စာအုပ်၊ ဘောပင်)
-                  </option>
-                  <option value="Others">Others (အခြား)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Location */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-semibold text-base-content/80">
-                    တွေ့ရှိ/ပျောက်ဆုံးသည့်နေရာ (Location) *
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="ဥပမာ - Main Library, C-Building"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="input input-bordered input-sm w-full text-xs"
-                  required
-                />
-              </div>
-
-              {/* Contact Info */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-semibold text-base-content/80">
-                    ဆက်သွယ်ရန် (Contact Info) *
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="ဖုန်းနံပါတ် သို့မဟုတ် Telegram acc"
-                  value={contactInfo}
-                  onChange={(e) => setContactInfo(e.target.value)}
-                  className="input input-bordered input-sm w-full text-xs"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs font-semibold text-base-content/80">
-                  အသေးစိတ်ဖော်ပြချက် (Description)
-                </span>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="contact"
+                className="text-xs font-semibold text-base-content/80"
+              >
+                📞 {t('add.contact')} *
               </label>
-              <textarea
-                placeholder="ပစ္စည်း၏ အရောင်၊ အမှတ်အသား သို့မဟုတ် အခြား အသေးစိတ်အချက်အလက်များ..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="textarea textarea-bordered h-20 text-xs w-full"
-              ></textarea>
+              <input
+                id="contact"
+                type="text"
+                required
+                value={contactInfo}
+                disabled={isPending}
+                onChange={(e) => setContactInfo(e.target.value)}
+                placeholder={t('add.contactPh')}
+                className="input w-full text-base"
+              />
+              <p className="text-[11px] leading-relaxed text-base-content/50">
+                {t('add.contactHint')}
+              </p>
             </div>
+          </div>
 
-            {/* Image Upload & Preview */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs font-semibold text-base-content/80">
-                  ပစ္စည်းပုံ (Image)
+          <div className="space-y-1.5">
+            <label
+              htmlFor="description"
+              className="text-xs font-semibold text-base-content/80"
+            >
+              {t('add.description')}{' '}
+              <span className="font-normal text-base-content/50">
+                ({t('add.optional')})
+              </span>
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              disabled={isPending}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t('add.descriptionPh')}
+              className="textarea h-28 w-full text-base"
+            />
+          </div>
+
+          {/* Image */}
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-base-content/80">
+              🖼️ {t('add.image')}{' '}
+              <span className="font-normal text-base-content/50">
+                ({t('add.optional')})
+              </span>
+            </span>
+
+            {imagePreview ? (
+              <div className="relative overflow-hidden rounded-box border border-base-300 bg-base-200">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="max-h-72 w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  disabled={isPending}
+                  aria-label={t('add.imageRemove')}
+                  className="btn btn-circle btn-sm absolute right-2 top-2 bg-base-100/90"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <label
+                htmlFor="image"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-box border-2 border-dashed border-base-300 bg-base-200/40 p-6 text-center transition hover:border-primary hover:bg-primary/5 focus-within:border-primary"
+              >
+                <span className="text-3xl">📷</span>
+                <span className="text-sm font-semibold leading-relaxed">
+                  {t('add.imageUpload')}
                 </span>
-              </label>
-              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <span className="text-xs text-base-content/60">
+                  {t('add.imageHint')}
+                </span>
                 <input
+                  id="image"
                   type="file"
                   accept="image/*"
+                  disabled={isPending}
                   onChange={handleImageChange}
-                  className="file-input file-input-bordered file-input-sm w-full flex-1 text-xs"
+                  className="sr-only"
                 />
-                {imagePreview && (
-                  <div className="avatar">
-                    <div className="w-12 h-12 rounded-lg ring ring-primary ring-offset-base-100 ring-offset-1">
-                      <img src={imagePreview} alt="Preview" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+              </label>
+            )}
+          </div>
 
-            {/* Submit Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="btn btn-primary btn-sm w-full text-xs font-bold"
-              >
-                {createMutation.isPending ? (
-                  <>
-                    <span className="loading loading-spinner loading-xs"></span>
-                    တင်နေပါသည်...
-                  </>
-                ) : (
-                  '🚀 ပစ္စည်းစာရင်း တင်မည်'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="btn btn-primary mt-2 h-12 w-full text-sm font-bold shadow-md"
+          >
+            {isPending ? (
+              <>
+                <span className="loading loading-spinner loading-sm" />
+                {t('add.submitting')}
+              </>
+            ) : (
+              <>🚀 {t('add.submit')}</>
+            )}
+          </button>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }

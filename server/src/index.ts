@@ -43,7 +43,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/item', itemRoute);
 
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+  app.listen(PORT, () => console.log(`Server running on ${PORT}...`));
 }
 
 export default app;

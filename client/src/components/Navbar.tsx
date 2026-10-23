@@ -3,96 +3,143 @@ import React from 'react';
 import { useMe, useUserLogout } from '../hook/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useTheme } from '../context/ThemeContext';
+import { useLang } from '../context/LanguageContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { theme, toggleTheme } = useTheme();
+  const { lang, setLang, t } = useLang();
 
-  // TanStack Query မှ useMe ကို အသုံးပြု၍ Login ဝင်ထားခြင်း ရှိမရှိ စစ်ဆေးခြင်း
   const { data: user, isLoading } = useMe();
-  const isLoggedIn = !!user; // user data ရှိလျှင် true, မရှိလျှင် false
+  const isLoggedIn = !!user;
 
-  // Custom Hook မှ logout mutation ကို ခေါ်ယူခြင်း
   const { mutate: logoutMutation, isPending: isLoggingOut } = useUserLogout();
 
-  // Logout လုပ်သည့် Function (Backend API ခေါ်ပြီး Cookie ရှင်းလင်းခြင်း)
   const handleLogout = () => {
     logoutMutation(undefined, {
       onSuccess: () => {
-        // Query cache တွေကို ရှင်းလင်းခြင်း
         queryClient.clear();
-        // localStorage သို့မဟုတ် sessionStorage များကို ရှင်းရန် (လိုအပ်ပါက)
-        localStorage.clear();
+        // localStorage.clear() ကို မသုံးတော့ပါ (theme/language ပျက်သွားမှာမို့)
         sessionStorage.clear();
-        // Login စာမျက်နှာဆီသို့ တိကျစွာ ပို့ဆောင်ရန်
-        toast.success('အောင်မြင်စွာ Logout ထွက်ပြီးပါပြီ');
+        toast.success(t('nav.logoutSuccess'));
         setTimeout(() => {
           window.location.href = '/login';
-        }, 1000); // 1 စက္ကန့်စောင့်ပြီးမှ redirect လုပ်မည်
+        }, 1000);
       },
       onError: (error) => {
         console.error('Logout failed:', error);
-        toast.error('Logout failed');
+        toast.error(t('nav.logoutFailed'));
       },
     });
   };
 
-  // Logo အတွက် သီးသန့် Function
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      navigate('/');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (location.pathname !== '/') navigate('/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const closeDropdown = () =>
+    (document.activeElement as HTMLElement | null)?.blur();
+
   return (
-    <header className="navbar bg-base-100 shadow-sm px-6 lg:px-12 sticky top-0 z-50">
-      <div className="flex-1">
-        {/* Logo */}
+    <header className="navbar sticky top-0 z-50 bg-base-100 px-3 shadow-sm sm:px-6 lg:px-12">
+      <div className="min-w-0 flex-1">
         <a
           href="/"
           onClick={handleLogoClick}
-          className="text-xl font-extrabold tracking-tight text-primary flex items-center gap-2 cursor-pointer"
+          className="flex items-center gap-2 truncate text-lg font-extrabold tracking-tight text-primary sm:text-xl"
         >
-          🎓 Campus Lost & Found Hub
+          🎓
+          <span className="hidden sm:inline">Campus Lost & Found Hub</span>
+          <span className="sm:hidden">Campus Hub</span>
         </a>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Home / Dashboard Button */}
-        <Link
-          to="/dashboard"
-          className="btn btn-ghost btn-sm font-medium cursor-pointer"
+      <div className="flex items-center gap-1 sm:gap-2">
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => setLang(lang === 'my' ? 'en' : 'my')}
+          aria-label={t('nav.toggleLang')}
         >
-          Home
-        </Link>
+          {lang === 'my' ? 'EN' : 'မြန်မာ'}
+        </button>
 
-        <Link to="/dashboard/add-item" className="btn btn-primary btn-sm px-4">
-          Post Item
-        </Link>
+        <button
+          className="btn btn-ghost btn-circle btn-sm"
+          onClick={toggleTheme}
+          aria-label={t('nav.toggleTheme')}
+        >
+          {theme === 'campus-light' ? '🌙' : '☀️'}
+        </button>
 
-        {/* Loading စစ်နေစဉ် ခဏစောင့်ရန် (Optional) */}
-        {isLoading ? (
-          <div className="w-16 h-8 animate-pulse bg-base-300 rounded"></div>
-        ) : isLoggedIn ? (
-          // Login ဝင်ထားပါက Logout ပြရန် (Logout လုပ်နေစဉ် Loading ပြပေးရန် isLoggingOut ကို သုံးနိုင်သည်)
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="btn btn-outline btn-error btn-sm px-4"
-          >
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
-          </button>
-        ) : (
-          // မဝင်ရသေးပါက Login ခလုတ်ပြရန်
-          <Link to="/login" className="btn btn-outline btn-sm px-4">
-            Login
+        {/* Tablet / Desktop */}
+        <div className="hidden items-center gap-2 md:flex">
+          <Link to="/dashboard" className="btn btn-ghost btn-sm font-medium">
+            {t('nav.home')}
           </Link>
-        )}
+          <Link
+            to="/dashboard/add-item"
+            className="btn btn-primary btn-sm px-4"
+          >
+            {t('nav.postItem')}
+          </Link>
+          {isLoading ? (
+            <div className="h-8 w-16 animate-pulse rounded bg-base-300" />
+          ) : isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="btn btn-outline btn-error btn-sm px-4"
+            >
+              {isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}
+            </button>
+          ) : (
+            <Link to="/login" className="btn btn-outline btn-sm px-4">
+              {t('nav.login')}
+            </Link>
+          )}
+        </div>
+
+        {/* ဖုန်း: Hamburger */}
+        <div className="dropdown dropdown-end md:hidden">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-circle btn-sm"
+            aria-label={t('nav.menu')}
+          >
+            ☰
+          </div>
+          <ul
+            tabIndex={0}
+            onClick={closeDropdown}
+            className="menu dropdown-content z-10 mt-3 w-56 rounded-box bg-base-100 p-2 shadow"
+          >
+            <li>
+              <Link to="/dashboard">{t('nav.home')}</Link>
+            </li>
+            <li>
+              <Link to="/dashboard/add-item">{t('nav.postItem')}</Link>
+            </li>
+            <li>
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="text-error"
+                >
+                  {isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}
+                </button>
+              ) : (
+                <Link to="/login">{t('nav.login')}</Link>
+              )}
+            </li>
+          </ul>
+        </div>
       </div>
     </header>
   );
