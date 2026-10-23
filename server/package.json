@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/src/index.js"
+    "build": "prisma generate && tsc",
+    "start": "node dist/src/index.js",
+    "postinstall": "prisma generate"
   },
   "type": "module",
   "keywords": [],

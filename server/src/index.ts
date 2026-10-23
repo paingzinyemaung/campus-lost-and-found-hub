@@ -40,6 +40,8 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoute);
 app.use('/api/item', itemRoute);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}...`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+}
+
+export default app;
