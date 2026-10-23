@@ -63,7 +63,7 @@ export default function ItemDetailModal({
         </div>
 
         {/* Image */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
+        <div className="relative aspect-16/10 w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
           {item.imageUrl ? (
             <img
               src={item.imageUrl}
