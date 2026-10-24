@@ -16,7 +16,7 @@ const CATEGORIES = [
   'Others',
 ];
 const STATUSES = ['LOST', 'FOUND', 'RESOLVED'];
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 
 export default function Items() {
   const { data: itemsResponse, isLoading, error } = useItems();
@@ -118,7 +118,7 @@ export default function Items() {
         </div>
 
         {/* Search & Filters */}
-        <div className="grid grid-cols-1 gap-3 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 rounded-box border border-base-300 bg-base-100 p-3 shadow-sm sm:gap-3 sm:p-4 md:grid-cols-3">
           <input
             type="search"
             placeholder={t('items.search')}
@@ -127,8 +127,9 @@ export default function Items() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="input w-full text-base"
+            className="input col-span-2 w-full text-base md:col-span-1"
           />
+          {/* select ၂ ခုက မူလအတိုင်း ထားပါ */}
           <select
             value={selectedCategory}
             onChange={(e) => {
@@ -180,14 +181,14 @@ export default function Items() {
 
         {/* Loading skeleton */}
         {isLoading && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="overflow-hidden rounded-box border border-base-300 bg-base-100"
+                className="flex overflow-hidden rounded-box border border-base-300 bg-base-100 sm:flex-col"
               >
-                <div className="skeleton aspect-[4/3] w-full rounded-none" />
-                <div className="space-y-3 p-4">
+                <div className="skeleton aspect-square w-28 shrink-0 rounded-none sm:aspect-4/3 sm:w-full" />
+                <div className="flex-1 space-y-3 p-3 sm:p-4">
                   <div className="skeleton h-4 w-2/3" />
                   <div className="skeleton h-3 w-1/2" />
                   <div className="skeleton h-3 w-full" />

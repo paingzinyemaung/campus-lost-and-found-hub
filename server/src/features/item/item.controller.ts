@@ -4,6 +4,8 @@ import type { AuthRequest } from '../../middleware/auth.middleware.js';
 
 import { cloudinary } from '../../middleware/upload.middleware.js';
 
+import { isValidStatus, resolveStatusChange } from './item.status.js';
+
 // ၁. ပစ္စည်းအသစ် တင်ခြင်း (Lost & Found Post Create)
 export const createItem = async (req: AuthRequest, res: Response) => {
   try {
@@ -224,6 +226,20 @@ export const updateItem = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // status တန်ဖိုး မှန်မမှန် စစ်ခြင်း
+    if (status !== undefined && !isValidStatus(status)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'status တန်ဖိုး မမှန်ကန်ပါ။',
+      });
+    }
+
+    // Resolved/ပြန်ဖွင့် အတွက် status နှင့် previousStatus တွက်ချက်ခြင်း
+    const nextState = resolveStatusChange(
+      existingItem,
+      status !== undefined ? status : existingItem.status,
+    );
+
     // ၃. ပစ္စည်းအချက်အလက်များကို Update လုပ်ခြင်း
     const updatedItem = await prisma.item.update({
       where: { id },
@@ -235,7 +251,8 @@ export const updateItem = async (req: AuthRequest, res: Response) => {
         location: location !== undefined ? location : existingItem.location,
         contactInfo:
           contactInfo !== undefined ? contactInfo : existingItem.contactInfo,
-        status: status !== undefined ? status : existingItem.status,
+        status: nextState.status,
+        previousStatus: nextState.previousStatus,
         imageUrl: imageUrl !== undefined ? imageUrl : existingItem.imageUrl,
       },
     });

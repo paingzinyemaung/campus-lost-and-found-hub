@@ -19,16 +19,17 @@ model User {
 }
 
 model Item {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  category    String
-  status      String   @default("LOST")
-  imageUrl    String?
-  location    String
-  contactInfo String
-  userId      String
-  user        User     @relation("UserItems", fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  category       String
+  status         String   @default("LOST")
+  previousStatus String?
+  imageUrl       String?
+  location       String
+  contactInfo    String
+  userId         String
+  user           User     @relation("UserItems", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

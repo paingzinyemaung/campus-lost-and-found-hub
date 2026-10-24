@@ -30,6 +30,7 @@ export type ItemMinAggregateOutputType = {
   description: string | null
   category: string | null
   status: string | null
+  previousStatus: string | null
   imageUrl: string | null
   location: string | null
   contactInfo: string | null
@@ -44,6 +45,7 @@ export type ItemMaxAggregateOutputType = {
   description: string | null
   category: string | null
   status: string | null
+  previousStatus: string | null
   imageUrl: string | null
   location: string | null
   contactInfo: string | null
@@ -58,6 +60,7 @@ export type ItemCountAggregateOutputType = {
   description: number
   category: number
   status: number
+  previousStatus: number
   imageUrl: number
   location: number
   contactInfo: number
@@ -74,6 +77,7 @@ export type ItemMinAggregateInputType = {
   description?: true
   category?: true
   status?: true
+  previousStatus?: true
   imageUrl?: true
   location?: true
   contactInfo?: true
@@ -88,6 +92,7 @@ export type ItemMaxAggregateInputType = {
   description?: true
   category?: true
   status?: true
+  previousStatus?: true
   imageUrl?: true
   location?: true
   contactInfo?: true
@@ -102,6 +107,7 @@ export type ItemCountAggregateInputType = {
   description?: true
   category?: true
   status?: true
+  previousStatus?: true
   imageUrl?: true
   location?: true
   contactInfo?: true
@@ -189,6 +195,7 @@ export type ItemGroupByOutputType = {
   description: string
   category: string
   status: string
+  previousStatus: string | null
   imageUrl: string | null
   location: string
   contactInfo: string
@@ -224,6 +231,7 @@ export type ItemWhereInput = {
   description?: Prisma.StringFilter<"Item"> | string
   category?: Prisma.StringFilter<"Item"> | string
   status?: Prisma.StringFilter<"Item"> | string
+  previousStatus?: Prisma.StringNullableFilter<"Item"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Item"> | string | null
   location?: Prisma.StringFilter<"Item"> | string
   contactInfo?: Prisma.StringFilter<"Item"> | string
@@ -239,6 +247,7 @@ export type ItemOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  previousStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrder
   contactInfo?: Prisma.SortOrder
@@ -257,6 +266,7 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"Item"> | string
   category?: Prisma.StringFilter<"Item"> | string
   status?: Prisma.StringFilter<"Item"> | string
+  previousStatus?: Prisma.StringNullableFilter<"Item"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Item"> | string | null
   location?: Prisma.StringFilter<"Item"> | string
   contactInfo?: Prisma.StringFilter<"Item"> | string
@@ -272,6 +282,7 @@ export type ItemOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  previousStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrder
   contactInfo?: Prisma.SortOrder
@@ -292,6 +303,7 @@ export type ItemScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"Item"> | string
   category?: Prisma.StringWithAggregatesFilter<"Item"> | string
   status?: Prisma.StringWithAggregatesFilter<"Item"> | string
+  previousStatus?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
   location?: Prisma.StringWithAggregatesFilter<"Item"> | string
   contactInfo?: Prisma.StringWithAggregatesFilter<"Item"> | string
@@ -306,6 +318,7 @@ export type ItemCreateInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -320,6 +333,7 @@ export type ItemUncheckedCreateInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -334,6 +348,7 @@ export type ItemUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -348,6 +363,7 @@ export type ItemUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -362,6 +378,7 @@ export type ItemCreateManyInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -376,6 +393,7 @@ export type ItemUpdateManyMutationInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -389,6 +407,7 @@ export type ItemUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -413,6 +432,7 @@ export type ItemCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  previousStatus?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   location?: Prisma.SortOrder
   contactInfo?: Prisma.SortOrder
@@ -427,6 +447,7 @@ export type ItemMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  previousStatus?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   location?: Prisma.SortOrder
   contactInfo?: Prisma.SortOrder
@@ -441,6 +462,7 @@ export type ItemMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  previousStatus?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   location?: Prisma.SortOrder
   contactInfo?: Prisma.SortOrder
@@ -501,6 +523,7 @@ export type ItemCreateWithoutUserInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -514,6 +537,7 @@ export type ItemUncheckedCreateWithoutUserInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -556,6 +580,7 @@ export type ItemScalarWhereInput = {
   description?: Prisma.StringFilter<"Item"> | string
   category?: Prisma.StringFilter<"Item"> | string
   status?: Prisma.StringFilter<"Item"> | string
+  previousStatus?: Prisma.StringNullableFilter<"Item"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"Item"> | string | null
   location?: Prisma.StringFilter<"Item"> | string
   contactInfo?: Prisma.StringFilter<"Item"> | string
@@ -570,6 +595,7 @@ export type ItemCreateManyUserInput = {
   description: string
   category: string
   status?: string
+  previousStatus?: string | null
   imageUrl?: string | null
   location: string
   contactInfo: string
@@ -583,6 +609,7 @@ export type ItemUpdateWithoutUserInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -596,6 +623,7 @@ export type ItemUncheckedUpdateWithoutUserInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -609,6 +637,7 @@ export type ItemUncheckedUpdateManyWithoutUserInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  previousStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.StringFieldUpdateOperationsInput | string
   contactInfo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -624,6 +653,7 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   description?: boolean
   category?: boolean
   status?: boolean
+  previousStatus?: boolean
   imageUrl?: boolean
   location?: boolean
   contactInfo?: boolean
@@ -639,6 +669,7 @@ export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   category?: boolean
   status?: boolean
+  previousStatus?: boolean
   imageUrl?: boolean
   location?: boolean
   contactInfo?: boolean
@@ -654,6 +685,7 @@ export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   category?: boolean
   status?: boolean
+  previousStatus?: boolean
   imageUrl?: boolean
   location?: boolean
   contactInfo?: boolean
@@ -669,6 +701,7 @@ export type ItemSelectScalar = {
   description?: boolean
   category?: boolean
   status?: boolean
+  previousStatus?: boolean
   imageUrl?: boolean
   location?: boolean
   contactInfo?: boolean
@@ -677,7 +710,7 @@ export type ItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "category" | "status" | "imageUrl" | "location" | "contactInfo" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["item"]>
+export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "category" | "status" | "previousStatus" | "imageUrl" | "location" | "contactInfo" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["item"]>
 export type ItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -699,6 +732,7 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description: string
     category: string
     status: string
+    previousStatus: string | null
     imageUrl: string | null
     location: string
     contactInfo: string
@@ -1134,6 +1168,7 @@ export interface ItemFieldRefs {
   readonly description: Prisma.FieldRef<"Item", 'String'>
   readonly category: Prisma.FieldRef<"Item", 'String'>
   readonly status: Prisma.FieldRef<"Item", 'String'>
+  readonly previousStatus: Prisma.FieldRef<"Item", 'String'>
   readonly imageUrl: Prisma.FieldRef<"Item", 'String'>
   readonly location: Prisma.FieldRef<"Item", 'String'>
   readonly contactInfo: Prisma.FieldRef<"Item", 'String'>

@@ -7,6 +7,8 @@ import { useLang } from '../context/LanguageContext';
 import { statusBadge, useLabels } from '../hook/labels';
 import type { Item } from '../components/ItemCard';
 
+import { optimizeImage } from '../lib/image';
+
 type MyItem = Item & { userId: string };
 
 export default function Home() {
@@ -29,7 +31,8 @@ export default function Home() {
   const myItems = items.filter((item) => item.userId === currentUser?.id);
 
   const handleToggleStatus = (item: MyItem) => {
-    const newStatus = item.status === 'RESOLVED' ? 'LOST' : 'RESOLVED';
+    const newStatus =
+      item.status === 'RESOLVED' ? (item.previousStatus ?? 'LOST') : 'RESOLVED';
     updateMutation.mutate(
       { id: item.id, data: { ...item, status: newStatus } },
       {
@@ -107,7 +110,9 @@ export default function Home() {
             : 'btn-ghost border-base-300'
         }`}
       >
-        {item.status !== 'RESOLVED' ? t('home.markResolved') : t('home.reopen')}
+        {item.status !== 'RESOLVED'
+          ? t('home.markResolved')
+          : `${t('home.reopen')} (${label('status', item.previousStatus ?? 'LOST')})`}
       </button>
       <button
         onClick={() => setDeleteTarget(item)}
@@ -135,7 +140,7 @@ export default function Home() {
   const thumb = (item: MyItem, size: string) =>
     item.imageUrl ? (
       <img
-        src={item.imageUrl}
+        src={optimizeImage(item.imageUrl, 200)}
         alt={item.title}
         className={`${size} shrink-0 rounded-lg object-cover`}
       />

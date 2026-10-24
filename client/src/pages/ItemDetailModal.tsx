@@ -4,6 +4,8 @@ import { useLang } from '../context/LanguageContext';
 import { statusBadge, useLabels } from '../hook/labels';
 import type { Item } from '../components/ItemCard';
 
+import { optimizeImage } from '../lib/image';
+
 interface ItemDetailModalProps {
   item: Item | null;
   isOpen: boolean;
@@ -66,7 +68,7 @@ export default function ItemDetailModal({
         <div className="relative aspect-16/10 w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
           {item.imageUrl ? (
             <img
-              src={item.imageUrl}
+              src={optimizeImage(item.imageUrl, 900)}
               alt={item.title}
               className="h-full w-full object-cover"
             />

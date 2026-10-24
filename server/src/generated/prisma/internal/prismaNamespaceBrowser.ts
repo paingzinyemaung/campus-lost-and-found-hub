@@ -90,6 +90,7 @@ export const ItemScalarFieldEnum = {
   description: 'description',
   category: 'category',
   status: 'status',
+  previousStatus: 'previousStatus',
   imageUrl: 'imageUrl',
   location: 'location',
   contactInfo: 'contactInfo',
