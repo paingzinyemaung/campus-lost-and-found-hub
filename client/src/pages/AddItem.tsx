@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useCreateItem } from '../hook/item';
 import { useLang } from '../context/LanguageContext';
 import { useLabels } from '../hook/labels';
+import { compressImage } from '../lib/image';
 
 const CATEGORIES = [
   'Electronics',
@@ -12,7 +13,7 @@ const CATEGORIES = [
   'Books',
   'Others',
 ];
-const MAX_IMAGE_MB = 5;
+const MAX_ORIGINAL_MB = 20; // ရွေးတဲ့ မူလပုံ၏ အများဆုံး (တင်မယ့်ပုံက compress လုပ်ပြီးသား)
 
 export default function AddItem() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function AddItem() {
   const [contactInfo, setContactInfo] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // Preview URL ကို မသုံးတော့တဲ့အခါ memory ပြန်ရှင်းရန်
@@ -37,23 +39,29 @@ export default function AddItem() {
     };
   }, [imagePreview]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
       toast.error(t('add.imageNotImage'));
-      e.target.value = '';
+      input.value = '';
       return;
     }
-    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+    if (file.size > MAX_ORIGINAL_MB * 1024 * 1024) {
       toast.error(t('add.imageTooBig'));
-      e.target.value = '';
+      input.value = '';
       return;
     }
 
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setIsCompressing(true);
+    const compressed = await compressImage(file);
+    setIsCompressing(false);
+
+    setImageFile(compressed);
+    setImagePreview(URL.createObjectURL(compressed));
+    input.value = ''; // တူတဲ့ပုံ ထပ်ရွေးရင်လည်း အလုပ်လုပ်စေရန်
   };
 
   const removeImage = () => {
@@ -86,14 +94,31 @@ export default function AddItem() {
         navigate('/dashboard');
       },
       onError: (err: any) => {
-        const msg = err?.response?.data?.message || t('add.failed');
+        console.error('Create item failed:', err);
+
+        const statusCode: number | undefined = err?.response?.status;
+        const serverMessage: string | undefined = err?.response?.data?.message;
+
+        let msg: string;
+        if (serverMessage) {
+          msg = serverMessage;
+        } else if (err?.code === 'ECONNABORTED') {
+          msg = `${t('add.timeout')} [timeout]`;
+        } else if (statusCode === 413) {
+          msg = `${t('add.tooLargeServer')} [413]`;
+        } else if (!err?.response) {
+          msg = `${t('add.network')} [network]`;
+        } else {
+          msg = `${t('add.failed')} [${statusCode}]`;
+        }
+
         setErrorMessage(msg);
         toast.error(msg);
       },
     });
   };
 
-  const isPending = createMutation.isPending;
+  const isBusy = createMutation.isPending || isCompressing;
 
   const statusOptions = [
     {
@@ -189,7 +214,7 @@ export default function AddItem() {
                 type="text"
                 required
                 value={title}
-                disabled={isPending}
+                disabled={isBusy}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('add.itemTitlePh')}
                 className="input w-full text-base"
@@ -206,7 +231,7 @@ export default function AddItem() {
               <select
                 id="category"
                 value={category}
-                disabled={isPending}
+                disabled={isBusy}
                 onChange={(e) => setCategory(e.target.value)}
                 className="select w-full text-base"
               >
@@ -232,7 +257,7 @@ export default function AddItem() {
                 type="text"
                 required
                 value={location}
-                disabled={isPending}
+                disabled={isBusy}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder={t('add.locationPh')}
                 className="input w-full text-base"
@@ -251,7 +276,7 @@ export default function AddItem() {
                 type="text"
                 required
                 value={contactInfo}
-                disabled={isPending}
+                disabled={isBusy}
                 onChange={(e) => setContactInfo(e.target.value)}
                 placeholder={t('add.contactPh')}
                 className="input w-full text-base"
@@ -275,7 +300,7 @@ export default function AddItem() {
             <textarea
               id="description"
               value={description}
-              disabled={isPending}
+              disabled={isBusy}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('add.descriptionPh')}
               className="textarea h-28 w-full text-base"
@@ -291,7 +316,12 @@ export default function AddItem() {
               </span>
             </span>
 
-            {imagePreview ? (
+            {isCompressing ? (
+              <div className="flex items-center justify-center gap-2 rounded-box border-2 border-dashed border-base-300 bg-base-200/40 p-8 text-sm text-base-content/70">
+                <span className="loading loading-spinner loading-sm" />
+                {t('add.compressing')}
+              </div>
+            ) : imagePreview ? (
               <div className="relative overflow-hidden rounded-box border border-base-300 bg-base-200">
                 <img
                   src={imagePreview}
@@ -301,7 +331,7 @@ export default function AddItem() {
                 <button
                   type="button"
                   onClick={removeImage}
-                  disabled={isPending}
+                  disabled={isBusy}
                   aria-label={t('add.imageRemove')}
                   className="btn btn-circle btn-sm absolute right-2 top-2 bg-base-100/90"
                 >
@@ -324,7 +354,7 @@ export default function AddItem() {
                   id="image"
                   type="file"
                   accept="image/*"
-                  disabled={isPending}
+                  disabled={isBusy}
                   onChange={handleImageChange}
                   className="sr-only"
                 />
@@ -334,13 +364,13 @@ export default function AddItem() {
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isBusy}
             className="btn btn-primary mt-2 h-12 w-full text-sm font-bold shadow-md"
           >
-            {isPending ? (
+            {isBusy ? (
               <>
                 <span className="loading loading-spinner loading-sm" />
-                {t('add.submitting')}
+                {isCompressing ? t('add.compressing') : t('add.submitting')}
               </>
             ) : (
               <>🚀 {t('add.submit')}</>

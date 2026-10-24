@@ -562,9 +562,9 @@ export const translations = {
     'add.image': 'ပစ္စည်းပုံ',
     'add.optional': 'မဖြည့်လည်း ရသည်',
     'add.imageUpload': 'ပုံရွေးရန် နှိပ်ပါ',
-    'add.imageHint': 'JPG၊ PNG (အများဆုံး 5MB)',
+    'add.imageHint': 'JPG၊ PNG (JPG၊ PNG (အလိုအလျောက် သေးအောင် လုပ်ပေးပါမည်))',
     'add.imageRemove': 'ပုံဖယ်ရှားမည်',
-    'add.imageTooBig': 'ပုံအရွယ်အစား 5MB ထက် မကျော်ရပါ။',
+    'add.imageTooBig': 'ပုံအရွယ်အစား 20MB ထက် မကျော်ရပါ။',
     'add.imageNotImage': 'ပုံဖိုင်သာ ရွေးချယ်ပါ။',
     'add.submit': 'ပစ္စည်းစာရင်း တင်မည်',
     'add.submitting': 'တင်နေပါသည်...',
@@ -578,6 +578,13 @@ export const translations = {
       'သင်ရှာနေသော စာမျက်နှာသည် မရှိတော့ပါ၊ သို့မဟုတ် လိပ်စာ မှားနေနိုင်ပါသည်။',
     'notfound.home': 'ပင်မစာမျက်နှာသို့',
     'notfound.back': 'နောက်သို့ ပြန်မည်',
+
+    'add.compressing': 'ပုံကို ပြင်ဆင်နေပါသည်...',
+    'add.timeout':
+      'ချိတ်ဆက်ချိန် ကြာလွန်းနေပါသည်။ အင်တာနက် စစ်ပြီး ထပ်ကြိုးစားပါ။',
+    'add.network': 'ဆာဗာနှင့် ချိတ်ဆက်၍ မရပါ။ အင်တာနက် စစ်ပြီး ထပ်ကြိုးစားပါ။',
+    'add.tooLargeServer':
+      'ပုံအရွယ်အစား ကြီးလွန်းနေပါသည်။ ပုံသေးသေးဖြင့် ထပ်ကြိုးစားပါ။',
   },
   en: {
     // Navbar
@@ -748,15 +755,22 @@ export const translations = {
     'add.image': 'Photo',
     'add.optional': 'optional',
     'add.imageUpload': 'Tap to choose a photo',
-    'add.imageHint': 'JPG, PNG (max 5MB)',
+    'add.imageHint': 'JPG, PNG (resized automatically)',
     'add.imageRemove': 'Remove photo',
-    'add.imageTooBig': 'The image must be 5MB or smaller.',
+    'add.imageTooBig': 'The image must be 20MB or smaller.',
     'add.imageNotImage': 'Please choose an image file.',
     'add.submit': 'Post item',
     'add.submitting': 'Posting...',
     'add.requiredError': 'Please fill in all required fields.',
     'add.success': 'Item posted successfully.',
     'add.failed': 'Something went wrong while posting. Please try again.',
+
+    'add.compressing': 'Preparing photo...',
+    'add.timeout':
+      'The request took too long. Check your connection and try again.',
+    'add.network':
+      'Could not reach the server. Check your connection and try again.',
+    'add.tooLargeServer': 'The photo is too large. Please try a smaller one.',
 
     // Not found
     'notfound.title': 'Page not found',
