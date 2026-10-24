@@ -38,6 +38,10 @@ export default function Register() {
 
       <div className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-xl space-y-6 rounded-2xl border border-base-300 bg-base-100 p-6 shadow-xl sm:p-8 md:p-10">
+          <Link to="/" className="btn btn-ghost btn-xs -ml-2 w-fit">
+            ← {t('nav.backHome')}
+          </Link>
+
           <div className="space-y-2 text-center">
             <div className="mb-1 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-xl text-primary">
               ✨

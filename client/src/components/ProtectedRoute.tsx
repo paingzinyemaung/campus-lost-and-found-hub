@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useMe } from '../hook/auth';
 import Navbar from './Navbar';
 import { useLang } from '../context/LanguageContext';
@@ -6,6 +6,7 @@ import { useLang } from '../context/LanguageContext';
 const ProtectedRoute = () => {
   const { isLoading, isError } = useMe();
   const { t } = useLang();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -17,7 +18,8 @@ const ProtectedRoute = () => {
   }
 
   if (isError) {
-    return <Navigate to="/login" replace />;
+    // ဘယ်စာမျက်နှာကို သွားမလို့ဆိုတာ မှတ်ထားပြီး login သို့ ပို့မယ်
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   return (

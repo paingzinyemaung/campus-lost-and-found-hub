@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useUserLogin } from '../hook/auth';
 import toast from 'react-hot-toast';
@@ -7,7 +7,12 @@ import { useLang } from '../context/LanguageContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLang();
+
+  // ProtectedRoute က ပို့လိုက်တဲ့ "မူလသွားမယ့် စာမျက်နှာ"
+  const from = (location.state as { from?: string } | null)?.from;
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +29,7 @@ export default function Login() {
         },
         onSuccess: (res: any) => {
           toast.success(res.data.message);
-          navigate('/dashboard');
+          navigate(from ?? '/dashboard', { replace: true });
         },
       },
     );
@@ -36,6 +41,10 @@ export default function Login() {
 
       <div className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-md space-y-6 rounded-2xl border border-base-300 bg-base-100 p-6 shadow-xl sm:p-8">
+          <Link to="/" className="btn btn-ghost btn-xs -ml-2 w-fit">
+            ← {t('nav.backHome')}
+          </Link>
+
           <div className="space-y-2 text-center">
             <div className="mb-1 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-xl text-primary">
               👋
@@ -47,6 +56,12 @@ export default function Login() {
               {t('login.subtitle')}
             </p>
           </div>
+
+          {from && (
+            <div role="alert" className="alert alert-info alert-soft text-xs">
+              {t('login.needLogin')}
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
